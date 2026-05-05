@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>POLDEN ROULETTE PRO (STABLE)</title>
+    <title>POLDEN ROULETTE PRO (FIXED)</title>
     <style>
-        /* Стили оставляем те же, они работают отлично */
+        /* [Стили остаются прежними] */
         :root { --primary-red: #ef4444; --hover-red: #f87171; --primary-blue: #3b82f6; --hover-blue: #60a5fa; --primary-green: #22c55e; --bg-dark: #0f172a; --card-bg: #1e293b; --text-main: #f1f5f9; --main-font: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
         body { font-family: var(--main-font); background: var(--bg-dark); color: var(--text-main); display: flex; flex-direction: column; align-items: center; padding: 15px; margin: 0; overflow-x: hidden; text-transform: uppercase; }
         .header { text-align: center; margin-bottom: 15px; }
@@ -75,14 +75,15 @@
     const db = supabase.createClient(S_URL, S_KEY);
 
     let players = [];
-    let shootingPlayerId = null; 
+    let isLocalShooting = false; 
     const isAdmin = new URLSearchParams(window.location.search).get('role') === 'admin';
     if(isAdmin) document.getElementById('adminPanel').style.display = 'flex';
 
     const defaultNames = ["Витя", "Игорь (сценарист)", "Катя", "Вася (монтажер)", "Игорь (монтажер)", "Дима (монтажер)", "Артур", "Лиза", "Марина", "Вася (дизайнер)", "Саша"];
 
     async function loadData() {
-        const { data } = await db.from('players').select('*').order('id', { ascending: true });
+        const { data, error } = await db.from('players').select('*').order('id', { ascending: true });
+        if (error) return console.error("Ошибка загрузки:", error);
         players = data || [];
         render();
     }
@@ -91,13 +92,13 @@
         if(!confirm("Это удалит текущих игроков и создаст список заново. Уверен?")) return;
         await db.from('players').delete().neq('id', 0);
         const batch = defaultNames.map(n => ({
-            name: n.toUpperCase(),
+          name: n, // Теперь имя будет отправляться в базу ровно так, как написано в массиве
             chambers: [1,0,0,0,0,0].sort(() => Math.random() - 0.5),
             pointer: 0,
             dead: false
         }));
         await db.from('players').insert(batch);
-        loadData();
+        // loadData вызовется автоматически через Realtime
     }
 
     async function loadLogs() {
@@ -115,7 +116,8 @@
     }
 
     async function clearLog() {
-        if(confirm("Очистить логи?")) await db.from('logs').delete().neq('id', 0);
+        if(!isAdmin) return alert("Только для админа");
+        await db.from('logs').delete().neq('id', 0);
     }
 
     function createPoppers(cardEl) {
@@ -134,11 +136,11 @@
     }
 
     async function shoot(id) {
-        if (shootingPlayerId) return; 
+        if (isLocalShooting) return; 
         const p = players.find(x => x.id === id);
         if (!p || p.dead) return;
 
-        shootingPlayerId = id; 
+        isLocalShooting = true; 
         const cardEl = document.querySelector(`[data-id="${id}"]`);
         const svgEl = cardEl.querySelector('.revolver-svg');
         svgEl.classList.add('spinning');
@@ -158,7 +160,7 @@
                 await addLog(`${p.name}: ВЫЖИЛ (${chance}%)`, 'win');
                 createPoppers(cardEl);
             }
-            shootingPlayerId = null;
+            isLocalShooting = false;
         }, 1500);
     }
 
@@ -184,21 +186,19 @@
         
         players.forEach(p => {
             let card = document.querySelector(`[data-id="${p.id}"]`);
-            const isShooting = shootingPlayerId === p.id;
+            const isWin = p.lastResult === 'win' && !p.dead;
             
-            // Если карточки нет — создаем
             if (!card) {
                 card = document.createElement('div');
-                card.className = 'card';
                 card.setAttribute('data-id', p.id);
                 grid.appendChild(card);
             }
 
-            // Обновляем содержимое карточки, только если она СЕЙЧАС не крутится
-            if (!isShooting) {
+            // Если МЫ СЕЙЧАС крутим барабан, не перезаписываем HTML этой карточки, 
+            // иначе анимация прервется. Для всех остальных - обновляем.
+            if (!isLocalShooting || shootingId !== p.id) {
                 const left = 6 - p.pointer;
                 const chance = p.dead ? "100.00" : (100 / left).toFixed(2);
-                const isWin = p.lastResult === 'win' && !p.dead;
                 const imgPath = `images/${encodeURIComponent(p.name)}.jpg`;
 
                 card.className = `card ${p.dead ? 'card-dead' : ''} ${isWin ? 'card-win-glow' : ''}`;
@@ -224,22 +224,24 @@
             }
         });
 
-        // Удаляем из DOM карточки тех, кого нет в базе
-        const allCards = document.querySelectorAll('.card');
-        allCards.forEach(c => {
-            const id = parseInt(c.getAttribute('data-id'));
-            if (!players.find(p => p.id === id)) c.remove();
+        // Удаление лишних
+        document.querySelectorAll('.card').forEach(c => {
+            if (!players.find(p => p.id == c.getAttribute('data-id'))) c.remove();
         });
     }
 
-    // РЕАЛТАЙМ
-    db.channel('any')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'players' }, payload => {
-          console.log("Обновление данных...");
-          loadData();
+    // РЕАЛТАЙМ (Самый важный блок)
+    const channel = db.channel('realtime_world')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'players' }, (payload) => {
+          console.log("DB Change:", payload);
+          loadData(); // Перегружаем данные при любом изменении в таблице
       })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'logs' }, () => loadLogs())
-      .subscribe();
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'logs' }, () => {
+          loadLogs();
+      })
+      .subscribe((status) => {
+          console.log("Subscription status:", status);
+      });
 
     loadData();
     loadLogs();
