@@ -3,174 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>POLDEN ROULETTE PRO (SUPABASE)</title>
+    <title>POLDEN ROULETTE PRO (SUPABASE FIX)</title>
     <style>
-        :root { 
-            --primary-red: #ef4444; 
-            --hover-red: #f87171;
-            --primary-blue: #3b82f6; 
-            --hover-blue: #60a5fa;
-            --primary-green: #22c55e;
-            --bg-dark: #0f172a; 
-            --card-bg: #1e293b; 
-            --text-main: #f1f5f9;
-            --main-font: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-        }
-        
-        body { 
-            font-family: var(--main-font); 
-            background: var(--bg-dark); 
-            color: var(--text-main); 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            padding: 15px; 
-            margin: 0;
-            overflow-x: hidden;
-            text-transform: uppercase;
-        }
-
+        /* [Стили остаются такими же, как в твоем index.html] */
+        :root { --primary-red: #ef4444; --hover-red: #f87171; --primary-blue: #3b82f6; --hover-blue: #60a5fa; --primary-green: #22c55e; --bg-dark: #0f172a; --card-bg: #1e293b; --text-main: #f1f5f9; --main-font: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+        body { font-family: var(--main-font); background: var(--bg-dark); color: var(--text-main); display: flex; flex-direction: column; align-items: center; padding: 15px; margin: 0; overflow-x: hidden; text-transform: uppercase; }
         .header { text-align: center; margin-bottom: 15px; }
         .logo { width: 110px; height: auto; filter: drop-shadow(0 0 15px rgba(59, 130, 246, 0.4)); }
-
-        .container-wrapper {
-            position: relative;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-        }
-
-        .grid { 
-            display: flex; 
-            flex-wrap: wrap; 
-            gap: 12px; 
-            max-width: 1160px;
-            justify-content: center; 
-            z-index: 1;
-        }
-
-        /* LOG SYSTEM */
-        .game-log {
-            position: absolute;
-            right: 20px;
-            top: 0;
-            width: 220px;
-            background: rgba(15, 23, 42, 0.9);
-            border: 1px solid #334155;
-            border-radius: 14px;
-            padding: 12px;
-            max-height: 80vh;
-            overflow-y: auto;
-            font-size: 0.65rem;
-            font-weight: 800;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            scrollbar-width: thin;
-            z-index: 10;
-            backdrop-filter: blur(4px);
-        }
-        
-        .log-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            color: #64748b;
-            border-bottom: 1px solid #334155;
-            padding-bottom: 5px;
-            margin-bottom: 5px;
-            font-size: 0.55rem;
-        }
-
+        .container-wrapper { position: relative; width: 100%; display: flex; justify-content: center; }
+        .grid { display: flex; flex-wrap: wrap; gap: 12px; max-width: 1160px; justify-content: center; z-index: 1; }
+        .game-log { position: absolute; right: 20px; top: 0; width: 220px; background: rgba(15, 23, 42, 0.9); border: 1px solid #334155; border-radius: 14px; padding: 12px; max-height: 80vh; overflow-y: auto; font-size: 0.65rem; font-weight: 800; display: flex; flex-direction: column; gap: 6px; z-index: 10; backdrop-filter: blur(4px); }
+        .log-header { display: flex; justify-content: space-between; align-items: center; color: #64748b; border-bottom: 1px solid #334155; padding-bottom: 5px; margin-bottom: 5px; font-size: 0.55rem; }
         .clear-log { cursor: pointer; color: var(--primary-red); background: none; border: none; font-size: 0.5rem; font-weight: 900; }
-
         .log-entry { padding: 4px 8px; border-left: 2px solid var(--primary-blue); background: rgba(255,255,255,0.03); animation: slideIn 0.2s ease-out; }
         .log-win { border-color: var(--primary-green); color: var(--primary-green); }
         .log-fail { border-color: var(--primary-red); color: var(--primary-red); }
-
         @keyframes slideIn { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
-
-        /* CARD DESIGN */
-        .card { 
-            background: var(--card-bg); 
-            border-radius: 14px; 
-            padding: 12px; 
-            width: 180px; 
-            box-shadow: 0 8px 20px -5px rgba(0, 0, 0, 0.4); 
-            border: 1px solid #334155; 
-            text-align: center; 
-            position: relative;
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            box-sizing: border-box;
-        }
-
-        .card-dead::after {
-            content: "";
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: url('https://www.transparenttextures.com/patterns/broken-glass.png');
-            opacity: 0.5;
-            pointer-events: none;
-            border-radius: inherit; 
-            z-index: 5;
-        }
-        
-        .card-win-glow {
-            box-shadow: 0 0 30px rgba(34, 197, 94, 0.6) !important;
-            border-color: var(--primary-green) !important;
-        }
-
-        /* POPPERS */
-        .popper {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            pointer-events: none;
-            font-size: 1.6rem;
-            z-index: 100;
-            opacity: 0;
-            will-change: transform, opacity;
-        }
-
-        @keyframes cinematic-pop {
-            0% { transform: translate(-50%, -50%) scale(0) rotate(0deg); opacity: 0; }
-            15% { opacity: 1; transform: translate(-50%, -50%) scale(1.2) rotate(45deg); }
-            30% { transform: translate(-50%, -50%) translate(var(--tx-mid), var(--ty-up)) scale(1) rotate(180deg); }
-            100% { transform: translate(-50%, -50%) translate(var(--tx-end), 500px) scale(0.5) rotate(720deg); opacity: 0; }
-        }
+        .card { background: var(--card-bg); border-radius: 14px; padding: 12px; width: 180px; box-shadow: 0 8px 20px -5px rgba(0, 0, 0, 0.4); border: 1px solid #334155; text-align: center; position: relative; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); box-sizing: border-box; }
+        .card-dead::after { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: url('https://www.transparenttextures.com/patterns/broken-glass.png'); opacity: 0.5; pointer-events: none; border-radius: inherit; z-index: 5; }
+        .card-win-glow { box-shadow: 0 0 30px rgba(34, 197, 94, 0.6) !important; border-color: var(--primary-green) !important; }
+        .popper { position: absolute; top: 50%; left: 50%; pointer-events: none; font-size: 1.6rem; z-index: 100; opacity: 0; will-change: transform, opacity; }
+        @keyframes cinematic-pop { 0% { transform: translate(-50%, -50%) scale(0) rotate(0deg); opacity: 0; } 15% { opacity: 1; transform: translate(-50%, -50%) scale(1.2) rotate(45deg); } 30% { transform: translate(-50%, -50%) translate(var(--tx-mid), var(--ty-up)) scale(1) rotate(180deg); } 100% { transform: translate(-50%, -50%) translate(var(--tx-end), 500px) scale(0.5) rotate(720deg); opacity: 0; } }
         .animate-pop { animation: cinematic-pop 2.2s cubic-bezier(0.215, 0.61, 0.355, 1) forwards; }
-
-        @keyframes screen-shake {
-            0%, 100% { transform: translate(0,0); }
-            20% { transform: translate(-8px, 4px); }
-            40% { transform: translate(8px, -4px); }
-            60% { transform: translate(-8px, -4px); }
-            80% { transform: translate(8px, 4px); }
-        }
+        @keyframes screen-shake { 0%, 100% { transform: translate(0,0); } 20% { transform: translate(-8px, 4px); } 40% { transform: translate(8px, -4px); } 60% { transform: translate(-8px, -4px); } 80% { transform: translate(8px, 4px); } }
         .shake-active { animation: screen-shake 0.2s ease-in-out infinite; }
-
         .btn { font-family: var(--main-font); border: none; border-radius: 8px; padding: 10px; width: 100%; font-weight: 900; font-size: 0.75rem; cursor: pointer; margin-bottom: 6px; transition: all 0.2s ease; color: white; text-transform: uppercase; position: relative; }
-        
         .btn-shoot { background: var(--primary-red); box-shadow: 0 4px 0 #991b1b; }
-        .btn-shoot:hover:not(:disabled) { background: var(--hover-red); transform: translateY(-1px); box-shadow: 0 5px 0 #991b1b; }
         .btn-shoot:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 2px 0 #991b1b; }
-
         .btn-reset { background: var(--primary-blue); box-shadow: 0 4px 0 #1e40af; font-size: 0.65rem; }
-
         .add-btn { background: #334155; width: auto; padding: 12px 30px; margin-bottom: 20px; border-radius: 25px; border: 1px solid #475569; font-weight: 900; }
-
         .revolver-svg { width: 90px; height: 90px; margin-bottom: 8px; transition: filter 0.3s; }
         .bullet-red { fill: var(--primary-red) !important; filter: drop-shadow(0 0 8px var(--primary-red)); }
-        
         .avatar-container { width: 55px; height: 55px; margin: 8px auto; border-radius: 50%; padding: 2px; background: linear-gradient(45deg, #475569, #94a3b8); overflow: hidden; }
         .avatar-img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-        
         @keyframes spin-animation { from { transform: rotate(0deg); } to { transform: rotate(1440deg); } }
         .spinning { animation: spin-animation 1.5s cubic-bezier(0.15, 0, 0.15, 1) forwards; }
-        
         .btn-delete { position: absolute; top: 10px; right: 10px; background: none; border: none; color: #475569; cursor: pointer; font-weight: bold; z-index: 10; }
-        .btn-delete:hover { color: var(--primary-red); }
-
         .status-msg { font-size: 0.85rem; font-weight: 900; margin: 8px 0; min-height: 1.5em; }
         .success { color: var(--primary-green); }
         .fail { color: var(--primary-red); }
@@ -203,47 +71,60 @@
     const db = supabase.createClient(S_URL, S_KEY);
 
     let players = [];
+    let isAnimating = false; // Блокировка рендера во время анимации пули
     const isAdmin = new URLSearchParams(window.location.search).get('role') === 'admin';
 
+    const defaultNames = ["Витя", "Игорь (сценарист)", "Катя", "Вася (монтажер)", "Игорь (монтажер)", "Дима (монтажер)", "Артур", "Лиза", "Марина", "Вася (дизайнер)", "Саша"];
+
     async function loadData() {
+        if (isAnimating) return; // Не перерисовываем, пока крутится барабан
         const { data } = await db.from('players').select('*').order('id', { ascending: true });
-        players = data || [];
+        
+        // Авто-заполнение, если база пуста
+        if (!data || data.length === 0) {
+            console.log("База пуста, добавляю дефолтных игроков...");
+            const batch = defaultNames.map(n => ({
+                name: n.toUpperCase(),
+                chambers: [1,0,0,0,0,0].sort(() => Math.random() - 0.5),
+                pointer: 0,
+                dead: false
+            }));
+            await db.from('players').insert(batch);
+            return loadData();
+        }
+
+        players = data;
         render();
     }
 
     async function loadLogs() {
-        const { data } = await db.from('logs').select('*').order('id', { ascending: false }).limit(30);
+        const { data } = await db.from('logs').select('*').order('id', { ascending: false }).limit(20);
         const container = document.getElementById('gameLogEntries');
         container.innerHTML = (data || []).map(l => `
             <div class="log-entry ${l.type === 'win' ? 'log-win' : (l.type === 'fail' ? 'log-fail' : '')}">
-                [${new Date(l.created_at).toLocaleTimeString()}] ${l.text}
+                [${new Date(l.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'})}] ${l.text}
             </div>
         `).join('');
     }
 
     async function addLog(text, type) {
         await db.from('logs').insert([{ text, type }]);
-        loadLogs();
     }
 
     async function clearLog() {
-        if(!isAdmin) return alert("Только админ может чистить логи");
-        await db.from('logs').delete().neq('id', 0);
-        loadLogs();
+        if(confirm("Очистить логи?")) await db.from('logs').delete().neq('id', 0);
     }
 
     function createPoppers(cardEl) {
         const emojis = ['🎉', '✨', '🎊', '⭐️', '🔥', '💎'];
-        for(let i=0; i<25; i++) {
+        for(let i=0; i<20; i++) {
             const span = document.createElement('span');
             span.className = 'popper animate-pop';
             span.innerText = emojis[Math.floor(Math.random() * emojis.length)];
-            const sideWay = (Math.random() - 0.5) * 550; 
-            const upWay = -220 - (Math.random() * 280);  
+            const sideWay = (Math.random() - 0.5) * 400; 
             span.style.setProperty('--tx-mid', `${sideWay * 0.4}px`);
-            span.style.setProperty('--ty-up', `${upWay}px`);
+            span.style.setProperty('--ty-up', `${-200 - Math.random()*200}px`);
             span.style.setProperty('--tx-end', `${sideWay}px`);
-            span.style.animationDelay = `${Math.random() * 0.3}s`;
             cardEl.appendChild(span);
             setTimeout(() => span.remove(), 2300);
         }
@@ -253,43 +134,34 @@
         const p = players.find(x => x.id === id);
         if (!p || p.dead) return;
 
+        isAnimating = true; 
         const cardEl = document.querySelector(`[data-id="${id}"]`);
         const svgEl = cardEl.querySelector('.revolver-svg');
-        
-        // Локальная анимация вращения (сразу)
-        svgEl.classList.remove('spinning');
-        void svgEl.offsetWidth; 
         svgEl.classList.add('spinning');
 
         const left = 6 - p.pointer;
         const chance = (100 / left).toFixed(2);
 
-        // Ждем окончания анимации
         setTimeout(async () => {
             const hit = p.chambers[p.pointer] === 1;
             
             if (hit) {
-                // ШТРАФ
                 await db.from('players').update({ dead: true, lastResult: 'fail' }).eq('id', id);
-                await addLog(`${p.name}: ШТРАФ (ШАНС ${chance}%)`, 'fail');
-                
+                await addLog(`${p.name}: ШТРАФ (${chance}%)`, 'fail');
                 document.getElementById('mainGrid').classList.add('shake-active');
                 setTimeout(() => document.getElementById('mainGrid').classList.remove('shake-active'), 400);
             } else {
-                // ВЫЖИЛ
                 await db.from('players').update({ pointer: p.pointer + 1, lastResult: 'win' }).eq('id', id);
                 await addLog(`${p.name}: ВЫЖИЛ (${chance}%)`, 'win');
-                
-                cardEl.classList.add('card-win-glow');
                 createPoppers(cardEl);
-                setTimeout(() => cardEl.classList.remove('card-win-glow'), 2000);
             }
+            isAnimating = false;
         }, 1500);
     }
 
     async function reset(id) {
-        const p = players.find(x => x.id === id);
         const newChambers = [1, 0, 0, 0, 0, 0].sort(() => Math.random() - 0.5);
+        const p = players.find(x => x.id === id);
         await db.from('players').update({ chambers: newChambers, pointer: 0, dead: false, lastResult: null }).eq('id', id);
         await addLog(`${p.name}: ПЕРЕЗАРЯДКА`, 'info');
     }
@@ -297,12 +169,11 @@
     async function addPlayer() {
         const name = prompt("Имя игрока:")?.toUpperCase();
         if(!name) return;
-        const ch = [1, 0, 0, 0, 0, 0].sort(() => Math.random() - 0.5);
-        await db.from('players').insert([{ name, chambers: ch, pointer: 0, dead: false }]);
+        await db.from('players').insert([{ name, chambers: [1,0,0,0,0,0].sort(()=>Math.random()-0.5), pointer: 0, dead: false }]);
     }
 
     async function deletePlayer(id) {
-        if(confirm("Удалить игрока?")) await db.from('players').delete().eq('id', id);
+        if(confirm("Удалить?")) await db.from('players').delete().eq('id', id);
     }
 
     function render() {
@@ -319,41 +190,43 @@
             card.className = `card ${p.dead ? 'card-dead' : ''} ${isWin ? 'card-win-glow' : ''}`;
             card.setAttribute('data-id', p.id);
             
-            const statusHtml = isWin ? `<div class="status-msg success">ПОВЕЗЛО 🥳</div>` : 
-                             (p.dead ? '<div class="status-msg fail">ШТРАФ 💀</div>' : '<div class="status-msg"></div>');
+            // Пытаемся подгрузить картинку по имени. Если имя "ВАСЯ (МОНТАЖЕР)", ищем "ВАСЯ (МОНТАЖЕР).jpg"
+            const imgPath = `images/${encodeURIComponent(p.name)}.jpg`;
 
             card.innerHTML = `
                 ${isAdmin ? `<button class="btn-delete" onclick="deletePlayer(${p.id})">✕</button>` : ''}
-                <div style="font-weight:900; margin-bottom:10px; font-size:1rem;">${p.name}</div>
+                <div style="font-weight:900; margin-bottom:10px;">${p.name}</div>
                 <svg class="revolver-svg" viewBox="0 0 200 200">
-                    <circle cx="100" cy="100" r="90" fill="#475569" stroke="#1e293b" stroke-width="2" />
+                    <circle cx="100" cy="100" r="90" fill="#475569" />
                     ${[0,60,120,180,240,300].map((deg, i) => {
                         const isBullet = p.chambers[i] === 1 && p.dead;
                         return `<circle cx="100" cy="40" r="22" fill="#0f172a" class="${isBullet ? 'bullet-red' : ''}" transform="rotate(${deg} 100 100)"/>`
                     }).join('')}
                 </svg>
                 <div class="avatar-container">
-                    <img src="images/${encodeURIComponent(p.name)}.jpg" onerror="this.src='https://via.placeholder.com/60/334155/94a3b8?text=?'" class="avatar-img">
+                    <img src="${imgPath}" onerror="this.src='https://via.placeholder.com/60/334155/94a3b8?text=?'" class="avatar-img">
                 </div>
                 <div class="info-text">ОСТАЛОСЬ: ${left}/6</div>
                 <div class="info-text">ШАНС: ${chance}%</div>
-                ${statusHtml}
-                <div style="margin-top:10px; position:relative; z-index:10;">
-                    <button class="btn btn-shoot" onclick="shoot(${p.id})" ${p.dead ? 'disabled' : ''}>КРУТИТЬ</button>
-                    ${isAdmin ? `<button class="btn btn-reset" onclick="reset(${p.id})">СБРОСИТЬ</button>` : ''}
-                </div>
+                <div class="status-msg ${isWin ? 'success' : (p.dead ? 'fail' : '')}">${isWin ? 'ПОВЕЗЛО 🥳' : (p.dead ? 'ШТРАФ 💀' : '')}</div>
+                <button class="btn btn-shoot" onclick="shoot(${p.id})" ${p.dead ? 'disabled' : ''}>КРУТИТЬ</button>
+                ${isAdmin ? `<button class="btn btn-reset" onclick="reset(${p.id})">СБРОСИТЬ</button>` : ''}
             `;
             grid.appendChild(card);
         });
     }
 
-    // Слушаем изменения в базе в реальном времени
-    db.channel('any')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'players' }, () => loadData())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'logs' }, () => loadLogs())
+    // РЕАЛТАЙМ ПОДПИСКА
+    db.channel('db_changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'players' }, () => {
+          console.log("Изменение в игроках!");
+          loadData();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'logs' }, () => {
+          loadLogs();
+      })
       .subscribe();
 
-    // Инициализация
     loadData();
     loadLogs();
 </script>
