@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>POLDEN ROULETTE PRO (FIXED & ANIMATED)</title>
+    <title>POLDEN ROULETTE PRO (6-COL & EFFECTS)</title>
     <style>
         :root { 
             --primary-red: #ef4444; --hover-red: #f87171;
@@ -22,15 +22,17 @@
         .header { text-align: center; margin-bottom: 15px; }
         .logo { width: 110px; height: auto; filter: drop-shadow(0 0 15px rgba(59, 130, 246, 0.4)); }
 
+        /* СЕТКА НА 6 КАРТОЧЕК */
         .grid { 
-            display: flex; flex-wrap: wrap; gap: 15px; max-width: 1200px; 
+            display: flex; flex-wrap: wrap; gap: 12px; 
+            max-width: 1260px; /* (195px * 6) + (12px * 5) */
             justify-content: center; z-index: 1; padding-bottom: 50px;
         }
 
         /* КАРТОЧКА */
         .card { 
             background: var(--card-bg); border-radius: 14px; padding: 15px; 
-            width: 195px; height: 420px; 
+            width: 195px; height: 410px; 
             display: flex; flex-direction: column; align-items: center;
             box-shadow: 0 8px 20px -5px rgba(0, 0, 0, 0.4); 
             border: 1px solid #334155; text-align: center; position: relative;
@@ -45,30 +47,40 @@
             display: block; margin-bottom: 12px; flex-shrink: 0;
         }
 
+        /* ЭФФЕКТ СМЕРТИ (БИТОЕ СТЕКЛО) */
         .card-dead::after {
             content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: url('https://www.transparenttextures.com/patterns/broken-glass.png');
             opacity: 0.5; pointer-events: none; border-radius: inherit; z-index: 5;
         }
         
-        .card-win-glow { box-shadow: 0 0 30px rgba(34, 197, 94, 0.6) !important; border-color: var(--primary-green) !important; }
+        /* СВЕЧЕНИЕ ПРИ ПОБЕДЕ */
+        .card-win-glow { box-shadow: 0 0 35px rgba(34, 197, 94, 0.7) !important; border-color: var(--primary-green) !important; }
 
-        /* АНИМАЦИИ */
-        .revolver-svg { width: 80px; height: 80px; margin-bottom: 10px; flex-shrink: 0; z-index: 2; }
+        /* АНИМАЦИЯ БАРАБАНА */
+        .revolver-svg { width: 85px; height: 85px; margin-bottom: 10px; flex-shrink: 0; z-index: 2; transition: filter 0.3s; }
         @keyframes spin-animation { from { transform: rotate(0deg); } to { transform: rotate(1440deg); } }
         .spinning { animation: spin-animation 1.5s cubic-bezier(0.15, 0, 0.15, 1) forwards; }
         
-        @keyframes screen-shake { 0%, 100% { transform: translate(0,0); } 20% { transform: translate(-8px, 4px); } 40% { transform: translate(8px, -4px); } 60% { transform: translate(-8px, -4px); } 80% { transform: translate(8px, 4px); } }
+        /* ТРЯСКА ЭКРАНА */
+        @keyframes screen-shake { 
+            0%, 100% { transform: translate(0,0); } 
+            20% { transform: translate(-8px, 4px); } 
+            40% { transform: translate(8px, -4px); } 
+            60% { transform: translate(-8px, -4px); } 
+            80% { transform: translate(8px, 4px); } 
+        }
         .shake-active { animation: screen-shake 0.2s ease-in-out infinite; }
 
         /* КОНФЕТТИ */
         .popper { position: absolute; top: 50%; left: 50%; pointer-events: none; font-size: 1.6rem; z-index: 100; opacity: 0; }
         @keyframes cinematic-pop {
-            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
-            15% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
-            100% { transform: translate(-50%, -50%) translate(var(--tx-end), 500px) rotate(720deg); opacity: 0; }
+            0% { transform: translate(-50%, -50%) scale(0) rotate(0deg); opacity: 0; }
+            15% { opacity: 1; transform: translate(-50%, -50%) scale(1.2) rotate(45deg); }
+            30% { transform: translate(-50%, -50%) translate(var(--tx-mid), var(--ty-up)) scale(1) rotate(180deg); }
+            100% { transform: translate(-50%, -50%) translate(var(--tx-end), 500px) rotate(720deg) scale(0.5); opacity: 0; }
         }
-        .animate-pop { animation: cinematic-pop 2.2s forwards; }
+        .animate-pop { animation: cinematic-pop 2.2s cubic-bezier(0.215, 0.61, 0.355, 1) forwards; }
 
         .avatar-container { 
             width: 60px; height: 60px; border-radius: 50%; overflow: hidden; 
@@ -77,7 +89,7 @@
         .avatar-img { width: 100%; height: 100%; object-fit: cover; }
 
         .info-text { font-size: 0.65rem; font-weight: 900; color: #94a3b8; margin: 2px 0; }
-        .status-msg { font-size: 0.75rem; font-weight: 900; min-height: 1.5em; margin: 8px 0; }
+        .status-msg { font-size: 0.75rem; font-weight: 900; min-height: 1.5em; margin: 5px 0; }
 
         .controls { width: 100%; margin-top: auto; }
         .btn { 
@@ -87,17 +99,18 @@
         }
         .btn-shoot { background: var(--primary-red); box-shadow: 0 4px 0 #991b1b; }
         .btn-shoot:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 2px 0 #991b1b; }
-        .btn-reset { background: var(--primary-blue); box-shadow: 0 3px 0 #1e40af; opacity: 0.9; }
+        .btn-reset { background: var(--primary-blue); box-shadow: 0 3px 0 #1e40af; font-size: 0.6rem; opacity: 0.9; }
 
         .game-log {
             position: fixed; right: 20px; top: 20px; width: 220px; 
             background: rgba(15, 23, 42, 0.95); border: 1px solid #334155; 
             border-radius: 14px; padding: 12px; max-height: 80vh;
-            overflow-y: auto; font-size: 0.6rem; z-index: 1000; backdrop-filter: blur(8px);
+            overflow-y: auto; font-size: 0.55rem; z-index: 1000; backdrop-filter: blur(8px);
         }
 
         .admin-panel { display: flex; gap: 10px; margin-bottom: 25px; }
         .btn-admin { background: #334155; width: auto; padding: 10px 20px; border-radius: 20px; }
+        .bullet-red { fill: var(--primary-red) !important; filter: drop-shadow(0 0 8px var(--primary-red)); }
     </style>
 </head>
 <body>
@@ -114,9 +127,9 @@
     <div class="grid" id="mainGrid"></div>
 
     <div class="game-log">
-        <div style="display:flex; justify-content:space-between; margin-bottom:8px; color:#64748b; border-bottom:1px solid #334155;">
-            <span>LOGS</span>
-            <button onclick="clearLog()" style="background:none; border:none; color:var(--primary-red); cursor:pointer;">X</button>
+        <div style="display:flex; justify-content:space-between; margin-bottom:8px; border-bottom:1px solid #334155; padding-bottom:4px;">
+            <span style="color:#64748b">LOG CONSOLE</span>
+            <button onclick="clearLog()" style="background:none; border:none; color:var(--primary-red); cursor:pointer;">CLR</button>
         </div>
         <div id="gameLogEntries"></div>
     </div>
@@ -128,7 +141,7 @@
     const db = supabase.createClient(S_URL, S_KEY);
 
     let players = [];
-    let localShootingId = null; 
+    let shootingId = null; 
     const isAdmin = new URLSearchParams(window.location.search).get('role') === 'admin';
     if(isAdmin) document.getElementById('adminPanel').style.display = 'flex';
 
@@ -139,32 +152,36 @@
     }
 
     async function loadLogs() {
-        const { data } = await db.from('logs').select('*').order('id', { ascending: false }).limit(20);
+        const { data } = await db.from('logs').select('*').order('id', { ascending: false }).limit(30);
         document.getElementById('gameLogEntries').innerHTML = (data || []).map(l => `
-            <div style="color:${l.type==='fail'?'#ef4444':l.type==='win'?'#22c55e':'#94a3b8'}; margin-bottom:3px;">
-                [${new Date(l.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}] ${l.text}
+            <div style="margin-bottom:3px; color:${l.type==='fail'?'#ef4444':l.type==='win'?'#22c55e':'#94a3b8'}">
+                [${new Date(l.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'})}] ${l.text}
             </div>
         `).join('');
     }
 
     function createPoppers(cardEl) {
-        const emojis = ['🎉', '✨', '🎊', '⭐️', '🔥', '💎'];
+        const emojis = ['🎉', '✨', '🎊', '⭐️', '🔥', '💎', '🔵', '🟡'];
         for(let i=0; i<25; i++) {
             const span = document.createElement('span');
             span.className = 'popper animate-pop';
             span.innerText = emojis[Math.floor(Math.random() * emojis.length)];
-            span.style.setProperty('--tx-end', `${(Math.random() - 0.5) * 400}px`);
+            const sideWay = (Math.random() - 0.5) * 550; 
+            const upWay = -220 - (Math.random() * 280);  
+            span.style.setProperty('--tx-mid', `${sideWay * 0.4}px`);
+            span.style.setProperty('--ty-up', `${upWay}px`);
+            span.style.setProperty('--tx-end', `${sideWay}px`);
             cardEl.appendChild(span);
             setTimeout(() => span.remove(), 2300);
         }
     }
 
     async function shoot(id) {
-        if (localShootingId) return;
+        if (shootingId) return;
         const p = players.find(x => x.id === id);
         if (!p || p.dead) return;
 
-        localShootingId = id;
+        shootingId = id; 
         const cardEl = document.querySelector(`[data-id="${id}"]`);
         const svgEl = cardEl.querySelector('.revolver-svg');
         
@@ -187,15 +204,8 @@
                 await db.from('logs').insert([{ text: `${p.name}: ВЫЖИЛ (${chance}%)`, type: 'win' }]);
                 createPoppers(cardEl);
             }
-            localShootingId = null;
+            shootingId = null;
         }, 1500);
-    }
-
-    async function reset(id) {
-        await db.from('players').update({ 
-            chambers: [1,0,0,0,0,0].sort(()=>Math.random()-0.5), 
-            pointer: 0, dead: false, lastResult: null 
-        }).eq('id', id);
     }
 
     async function restoreDefaultPlayers() {
@@ -208,9 +218,13 @@
         })));
     }
 
+    async function reset(id) {
+        await db.from('players').update({ chambers: [1,0,0,0,0,0].sort(()=>Math.random()-0.5), pointer: 0, dead: false, lastResult: null }).eq('id', id);
+    }
+
     async function addPlayer() {
         const name = prompt("Имя:");
-        if(name) await db.from('players').insert([{ name, chambers: [1,0,0,0,0,0].sort(()=>Math.random()-0.5), pointer: 0, dead: false }]);
+        if(name) await db.from('players').insert([{ name, chambers:[1,0,0,0,0,0].sort(()=>Math.random()-0.5), pointer:0, dead:false}]);
     }
 
     async function deletePlayer(id) {
@@ -232,8 +246,8 @@
                 grid.appendChild(card);
             }
 
-            // Важно: не перерисовываем карточку, если МЫ СЕЙЧАС её крутим
-            if (localShootingId !== p.id) {
+            // Не обновляем карточку в DOM, если мы её сейчас крутим (чтобы не обрывать анимацию)
+            if (shootingId !== p.id) {
                 const left = 6 - p.pointer;
                 const chance = p.dead ? "100.00" : (100 / left).toFixed(2);
                 const isWin = p.lastResult === 'win' && !p.dead;
@@ -244,7 +258,7 @@
                     ${isAdmin ? `<button style="position:absolute; top:8px; right:8px; background:none; border:none; color:#475569; cursor:pointer; font-weight:bold; z-index:20;" onclick="deletePlayer(${p.id})">✕</button>` : ''}
                     <div class="player-name" title="${p.name}">${p.name}</div>
                     <svg class="revolver-svg" viewBox="0 0 200 200">
-                        <circle cx="100" cy="100" r="90" fill="#475569" />
+                        <circle cx="100" cy="100" r="90" fill="#475569" stroke="#1e293b" stroke-width="2" />
                         ${[0,60,120,180,240,300].map((deg, i) => {
                             const isBullet = p.chambers[i] === 1 && p.dead;
                             return `<circle cx="100" cy="40" r="22" fill="#0f172a" class="${isBullet ? 'bullet-red' : ''}" transform="rotate(${deg} 100 100)"/>`
@@ -266,25 +280,21 @@
             }
         });
 
-        // Удаляем из DOM лишних
         document.querySelectorAll('.card').forEach(c => {
-            const id = parseInt(c.getAttribute('data-id'));
-            if (!players.find(p => p.id === id)) c.remove();
+            if (!players.find(p => p.id == c.getAttribute('data-id'))) c.remove();
         });
     }
 
-    // РЕАЛТАЙМ
-    db.channel('public:players')
+    // ПОДПИСКА НА РЕАЛТАЙМ
+    db.channel('db-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'players' }, (payload) => {
-          console.log('Update detected:', payload);
+          console.log('Change received!', payload);
           loadData();
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'logs' }, () => {
           loadLogs();
       })
-      .subscribe((status) => {
-          console.log('Realtime status:', status);
-      });
+      .subscribe();
 
     loadData();
     loadLogs();
