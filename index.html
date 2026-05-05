@@ -5,51 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>POLDEN ROULETTE PRO</title>
     <style>
-        /* Оставляем твой CSS без изменений, он отличный */
+        /* ВАЖНО: Твой оригинальный CSS из первого файла */
         :root { 
-            --primary-red: #ef4444; --hover-red: #f87171;
-            --primary-blue: #3b82f6; --hover-blue: #60a5fa;
-            --primary-green: #22c55e; --bg-dark: #0f172a; 
-            --card-bg: #1e293b; --text-main: #f1f5f9;
-            --main-font: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            --primary-red: #ef4444; --primary-blue: #3b82f6; --primary-green: #22c55e;
+            --bg-dark: #0f172a; --card-bg: #1e293b; --text-main: #f1f5f9;
         }
-        body { font-family: var(--main-font); background: var(--bg-dark); color: var(--text-main); display: flex; flex-direction: column; align-items: center; padding: 15px; margin: 0; text-transform: uppercase; }
-        .header { text-align: center; margin-bottom: 15px; }
-        .logo { width: 110px; filter: drop-shadow(0 0 15px rgba(59, 130, 246, 0.4)); }
-        .container-wrapper { position: relative; width: 100%; display: flex; justify-content: center; }
-        .grid { display: flex; flex-wrap: wrap; gap: 12px; max-width: 1160px; justify-content: center; }
-        .game-log { position: absolute; right: 20px; top: 0; width: 220px; background: rgba(15, 23, 42, 0.9); border: 1px solid #334155; border-radius: 14px; padding: 12px; max-height: 80vh; overflow-y: auto; font-size: 0.65rem; z-index: 10; }
-        .log-header { display: flex; justify-content: space-between; border-bottom: 1px solid #334155; padding-bottom: 5px; margin-bottom: 5px; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg-dark); color: var(--text-main); display: flex; flex-direction: column; align-items: center; padding: 15px; text-transform: uppercase; }
+        .grid { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 20px; }
         .card { background: var(--card-bg); border-radius: 14px; padding: 12px; width: 180px; border: 1px solid #334155; text-align: center; position: relative; }
-        .card-dead { opacity: 0.7; }
-        .card-dead::after { content: "💀"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 3rem; z-index: 5; }
+        .card-dead { opacity: 0.6; filter: grayscale(0.8); }
         .btn { border: none; border-radius: 8px; padding: 10px; width: 100%; font-weight: 900; cursor: pointer; margin-bottom: 6px; color: white; text-transform: uppercase; }
         .btn-shoot { background: var(--primary-red); }
         .btn-reset { background: var(--primary-blue); }
-        .add-btn { background: #334155; width: auto; padding: 12px 30px; margin-bottom: 20px; border-radius: 25px; }
+        .add-btn { background: #334155; width: auto; padding: 12px 30px; margin-bottom: 20px; border-radius: 25px; cursor: pointer; color: white; border: 1px solid #475569; }
         .revolver-svg { width: 80px; height: 80px; }
         .metal { fill: #475569; }
         .bullet-red { fill: var(--primary-red); }
         .avatar-container { width: 60px; height: 60px; margin: 10px auto; border-radius: 50%; border: 2px solid #475569; overflow: hidden; }
         .avatar-img { width: 100%; height: 100%; object-fit: cover; }
-        .btn-delete { position: absolute; top: 5px; right: 5px; background: none; border: none; color: #475569; cursor: pointer; }
+        .btn-delete { position: absolute; top: 5px; right: 5px; background: none; border: none; color: #475569; cursor: pointer; font-weight: bold; }
+        .status-msg { font-size: 0.8rem; font-weight: 900; margin: 5px 0; min-height: 1.2em; }
+        .success { color: var(--primary-green); }
+        .fail { color: var(--primary-red); }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <img src="images/PR_Logo.png" alt="Logo" class="logo">
-    </div>
-
-    <button class="btn add-btn" id="addBtn" onclick="addPlayer()">+ Добавить Игрока</button>
+    <img src="images/PR_Logo.png" style="width: 110px; margin-bottom: 15px;">
     
-    <div class="container-wrapper">
-        <div class="grid" id="mainGrid"></div>
-        <div class="game-log">
-            <div class="log-header"><span>LOG CONSOLE</span></div>
-            <div id="gameLogEntries"></div>
-        </div>
-    </div>
+    <button class="add-btn" id="addBtn" onclick="addPlayer()">+ Добавить Игрока</button>
+    
+    <div class="grid" id="mainGrid"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -59,17 +45,16 @@
 
     let players = [];
 
-    // Загрузка
     async function loadData() {
-        const { data } = await supabase.from('players').select('*').order('id', { ascending: true });
-        if (data) {
-            players = data;
-            render();
-        }
+        const { data, error } = await supabase.from('players').select('*').order('id', { ascending: true });
+        if (error) console.error("Ошибка загрузки:", error);
+        players = data || [];
+        render();
     }
 
-    // Realtime
-    supabase.channel('public:players').on('postgres_changes', { event: '*', schema: 'public', table: 'players' }, () => {
+    // Realtime обновление у всех
+    supabase.channel('custom-all-channel')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'players' }, () => {
         loadData();
     }).subscribe();
 
@@ -77,7 +62,7 @@
         const p = players.find(x => x.id === id);
         if (p.dead) return;
         const hit = p.chambers[p.pointer] === 1;
-        let updates = hit ? { dead: true, lastResult: 'fail' } : { pointer: p.pointer + 1, lastResult: 'win' };
+        const updates = hit ? { dead: true, lastResult: 'fail' } : { pointer: p.pointer + 1, lastResult: 'win' };
         await supabase.from('players').update(updates).eq('id', id);
     }
 
@@ -87,13 +72,9 @@
     }
 
     async function addPlayer() {
-        const name = prompt("Имя:") || "НОВЫЙ";
-        await supabase.from('players').insert([{
-            name: name.toUpperCase(),
-            chambers: [1, 0, 0, 0, 0, 0].sort(() => Math.random() - 0.5),
-            pointer: 0,
-            dead: false
-        }]);
+        const name = prompt("Введите имя:") || "НОВЫЙ";
+        const newChambers = [1, 0, 0, 0, 0, 0].sort(() => Math.random() - 0.5);
+        await supabase.from('players').insert([{ name: name.toUpperCase(), chambers: newChambers, pointer: 0, dead: false }]);
     }
 
     async function removePlayer(id) {
@@ -105,20 +86,19 @@
         const isAdmin = new URLSearchParams(window.location.search).get('role') === 'admin';
         grid.innerHTML = '';
         
-        // Скрываем общую кнопку добавления
         document.getElementById('addBtn').style.display = isAdmin ? 'block' : 'none';
 
         players.forEach(p => {
             const card = document.createElement('div');
             card.className = `card ${p.dead ? 'card-dead' : ''}`;
             
-            // Логика картинок: берем имя из базы и ищем в папке images
-            // Важно: если в базе "ВИТЯ", файл должен быть "ВИТЯ.jpg" или измените на lowercase
+            // Если имя "САША", ищет "images/САША.jpg"
             const imgPath = `images/${p.name}.jpg`;
+            const statusText = p.lastResult === 'win' ? '<div class="status-msg success">ВЫЖИЛ</div>' : (p.dead ? '<div class="status-msg fail">ШТРАФ</div>' : '<div class="status-msg"></div>');
 
             card.innerHTML = `
                 ${isAdmin ? `<button class="btn-delete" onclick="removePlayer(${p.id})">✕</button>` : ''}
-                <div style="font-weight:900; margin-bottom:10px;">${p.name}</div>
+                <div style="font-weight:900; margin-bottom:5px;">${p.name}</div>
                 <div class="avatar-container">
                     <img src="${imgPath}" onerror="this.src='https://via.placeholder.com/60/334155/94a3b8?text=?'" class="avatar-img">
                 </div>
@@ -129,7 +109,8 @@
                         return `<circle cx="100" cy="40" r="22" fill="#0f172a" class="${isBullet ? 'bullet-red' : ''}" transform="rotate(${deg} 100 100)"/>`
                     }).join('')}
                 </svg>
-                <div style="font-size:0.7rem; margin: 5px 0;">ПУЛЯ: ${p.dead ? 'В ГОЛОВЕ' : p.pointer + '/6'}</div>
+                <div style="font-size:0.65rem; margin-top:5px;">ПУЛЯ: ${p.pointer}/6</div>
+                ${statusText}
                 <button class="btn btn-shoot" onclick="shoot(${p.id})" ${p.dead ? 'disabled' : ''}>КРУТИТЬ</button>
                 ${isAdmin ? `<button class="btn btn-reset" onclick="reset(${p.id})">СБРОСИТЬ</button>` : ''}
             `;
