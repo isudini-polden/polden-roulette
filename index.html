@@ -374,5 +374,103 @@
     render();
     renderLogs();
 </script>
+    <!-- Подключаем библиотеку Supabase в самом верху скриптов -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+    // ВСТАВЬ СВОИ ДАННЫЕ ТУТ
+    const SUPABASE_URL = 'https://ezjxamiwgwuuslntfpcm.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV6anhhbWl3Z3d1dXNsbnRmcGNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5NzQ2ODgsImV4cCI6MjA5MzU1MDY4OH0.0vSWZaGVubIGVfAzcfcYbs-8g8YRPmO68BTal0HlXdU';
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let players = [];
+
+    // Загрузка данных при старте и обновлении
+    async function loadData() {
+        const { data, error } = await supabase
+            .from('players')
+            .select('*')
+            .order('id', { ascending: true });
+        
+        if (data) {
+            players = data;
+            render();
+        }
+    }
+
+    // РЕАЛЬНОЕ ВРЕМЯ: Слушаем изменения в базе
+    supabase
+        .channel('public:players')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'players' }, () => {
+            loadData(); // Как только кто-то выстрелил, у всех обновляется экран
+        })
+        .subscribe();
+
+    // Функция выстрела (теперь пишет в облако)
+    async function shoot(id) {
+        const p = players.find(x => x.id === id);
+        if (p.dead) return;
+
+        const hit = p.chambers[p.pointer] === 1;
+        let updates = hit 
+            ? { dead: true, lastResult: 'fail' } 
+            : { pointer: p.pointer + 1, lastResult: 'win' };
+
+        await supabase.from('players').update(updates).eq('id', id);
+    }
+
+    // Сброс (только для админа)
+    async function reset(id) {
+        const newChambers = [1, 0, 0, 0, 0, 0].sort(() => Math.random() - 0.5);
+        await supabase.from('players').update({
+            chambers: newChambers,
+            pointer: 0,
+            dead: false,
+            lastResult: null
+        }).eq('id', id);
+    }
+
+    // Добавление игрока (только для админа)
+    async function addPlayer() {
+        const name = prompt("Имя коллеги:") || "НОВЫЙ";
+        const newP = {
+            name: name.toUpperCase(),
+            chambers: [1, 0, 0, 0, 0, 0].sort(() => Math.random() - 0.5),
+            pointer: 0,
+            dead: false
+        };
+        await supabase.from('players').insert([newP]);
+    }
+
+    // Удаление (только для админа)
+    async function removePlayer(id) {
+        if(confirm("Удалить игрока?")) {
+            await supabase.from('players').delete().eq('id', id);
+        }
+    }
+
+    // Отрисовка (render) остается почти такой же, 
+    // но добавьте в конце функцию скрытия кнопок для не-админов
+    function render() {
+        const grid = document.getElementById('mainGrid');
+        grid.innerHTML = '';
+        
+        players.forEach(p => {
+            // ... тут твой старый код создания карточки ...
+            // (обязательно используй p.id, p.name, p.dead и т.д.)
+        });
+
+        // ПРОВЕРКА РОЛИ
+        const isAdmin = new URLSearchParams(window.location.search).get('role') === 'admin';
+        if (!isAdmin) {
+            if(document.querySelector('.add-btn')) document.querySelector('.add-btn').style.display = 'none';
+            document.querySelectorAll('.btn-reset').forEach(b => b.style.display = 'none');
+            document.querySelectorAll('.btn-delete').forEach(b => b.style.display = 'none');
+        }
+    }
+
+    // Первый запуск
+    loadData();
+</script>
 </body>
 </html>
