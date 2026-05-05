@@ -3,96 +3,194 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>POLDEN ROULETTE PRO</title>
+    <title>POLDEN ROULETTE PRO (SUPABASE)</title>
     <style>
         :root { 
-            --primary-red: #ef4444; --hover-red: #f87171;
-            --primary-blue: #3b82f6; --hover-blue: #60a5fa;
+            --primary-red: #ef4444; 
+            --hover-red: #f87171;
+            --primary-blue: #3b82f6; 
+            --hover-blue: #60a5fa;
             --primary-green: #22c55e;
-            --bg-dark: #0f172a; --card-bg: #1e293b; --text-main: #f1f5f9;
+            --bg-dark: #0f172a; 
+            --card-bg: #1e293b; 
+            --text-main: #f1f5f9;
             --main-font: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
         
         body { 
-            font-family: var(--main-font); background: var(--bg-dark); color: var(--text-main); 
-            display: flex; flex-direction: column; align-items: center; padding: 15px; margin: 0;
-            overflow-x: hidden; text-transform: uppercase;
+            font-family: var(--main-font); 
+            background: var(--bg-dark); 
+            color: var(--text-main); 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            padding: 15px; 
+            margin: 0;
+            overflow-x: hidden;
+            text-transform: uppercase;
         }
 
         .header { text-align: center; margin-bottom: 15px; }
         .logo { width: 110px; height: auto; filter: drop-shadow(0 0 15px rgba(59, 130, 246, 0.4)); }
 
-        .container-wrapper { position: relative; width: 100%; display: flex; justify-content: center; }
-        .grid { display: flex; flex-wrap: wrap; gap: 12px; max-width: 1160px; justify-content: center; z-index: 1; }
+        .container-wrapper {
+            position: relative;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        .grid { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 12px; 
+            max-width: 1160px;
+            justify-content: center; 
+            z-index: 1;
+        }
 
         /* LOG SYSTEM */
         .game-log {
-            position: absolute; right: 20px; top: 0; width: 220px; background: rgba(15, 23, 42, 0.9);
-            border: 1px solid #334155; border-radius: 14px; padding: 12px; max-height: 80vh;
-            overflow-y: auto; font-size: 0.65rem; font-weight: 800; display: flex; flex-direction: column;
-            gap: 6px; z-index: 10; backdrop-filter: blur(4px);
+            position: absolute;
+            right: 20px;
+            top: 0;
+            width: 220px;
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid #334155;
+            border-radius: 14px;
+            padding: 12px;
+            max-height: 80vh;
+            overflow-y: auto;
+            font-size: 0.65rem;
+            font-weight: 800;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            scrollbar-width: thin;
+            z-index: 10;
+            backdrop-filter: blur(4px);
         }
+        
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #64748b;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 5px;
+            margin-bottom: 5px;
+            font-size: 0.55rem;
+        }
+
+        .clear-log { cursor: pointer; color: var(--primary-red); background: none; border: none; font-size: 0.5rem; font-weight: 900; }
+
         .log-entry { padding: 4px 8px; border-left: 2px solid var(--primary-blue); background: rgba(255,255,255,0.03); animation: slideIn 0.2s ease-out; }
         .log-win { border-color: var(--primary-green); color: var(--primary-green); }
         .log-fail { border-color: var(--primary-red); color: var(--primary-red); }
+
         @keyframes slideIn { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
 
         /* CARD DESIGN */
         .card { 
-            background: var(--card-bg); border-radius: 14px; padding: 12px; width: 180px; 
-            border: 1px solid #334155; text-align: center; position: relative;
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); box-sizing: border-box;
+            background: var(--card-bg); 
+            border-radius: 14px; 
+            padding: 12px; 
+            width: 180px; 
+            box-shadow: 0 8px 20px -5px rgba(0, 0, 0, 0.4); 
+            border: 1px solid #334155; 
+            text-align: center; 
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-sizing: border-box;
         }
-        .card-dead::after {
-            content: "💀"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            font-size: 3rem; opacity: 0.2; z-index: 5;
-        }
-        .card-win-glow { box-shadow: 0 0 30px rgba(34, 197, 94, 0.6) !important; border-color: var(--primary-green) !important; }
 
-        /* ANIMATIONS */
-        @keyframes spin-animation { from { transform: rotate(0deg); } to { transform: rotate(1440deg); } }
-        .spinning { animation: spin-animation 1.2s cubic-bezier(0.15, 0, 0.15, 1) forwards; }
-        @keyframes screen-shake { 0%, 100% { transform: translate(0,0); } 20% { transform: translate(-8px, 4px); } 40% { transform: translate(8px, -4px); } 60% { transform: translate(-8px, -4px); } 80% { transform: translate(8px, 4px); } }
-        .shake-active { animation: screen-shake 0.2s ease-in-out infinite; }
+        .card-dead::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: url('https://www.transparenttextures.com/patterns/broken-glass.png');
+            opacity: 0.5;
+            pointer-events: none;
+            border-radius: inherit; 
+            z-index: 5;
+        }
+        
+        .card-win-glow {
+            box-shadow: 0 0 30px rgba(34, 197, 94, 0.6) !important;
+            border-color: var(--primary-green) !important;
+        }
 
         /* POPPERS */
-        .popper { position: absolute; top: 50%; left: 50%; pointer-events: none; font-size: 1.6rem; z-index: 100; opacity: 0; }
-        @keyframes cinematic-pop {
-            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
-            15% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
-            100% { transform: translate(-50%, -50%) translate(var(--tx-end), 500px) rotate(720deg); opacity: 0; }
+        .popper {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            pointer-events: none;
+            font-size: 1.6rem;
+            z-index: 100;
+            opacity: 0;
+            will-change: transform, opacity;
         }
-        .animate-pop { animation: cinematic-pop 2.2s forwards; }
 
-        /* BUTTONS */
-        .btn { border: none; border-radius: 8px; padding: 10px; width: 100%; font-weight: 900; cursor: pointer; margin-bottom: 6px; color: white; text-transform: uppercase; transition: all 0.2s; }
+        @keyframes cinematic-pop {
+            0% { transform: translate(-50%, -50%) scale(0) rotate(0deg); opacity: 0; }
+            15% { opacity: 1; transform: translate(-50%, -50%) scale(1.2) rotate(45deg); }
+            30% { transform: translate(-50%, -50%) translate(var(--tx-mid), var(--ty-up)) scale(1) rotate(180deg); }
+            100% { transform: translate(-50%, -50%) translate(var(--tx-end), 500px) scale(0.5) rotate(720deg); opacity: 0; }
+        }
+        .animate-pop { animation: cinematic-pop 2.2s cubic-bezier(0.215, 0.61, 0.355, 1) forwards; }
+
+        @keyframes screen-shake {
+            0%, 100% { transform: translate(0,0); }
+            20% { transform: translate(-8px, 4px); }
+            40% { transform: translate(8px, -4px); }
+            60% { transform: translate(-8px, -4px); }
+            80% { transform: translate(8px, 4px); }
+        }
+        .shake-active { animation: screen-shake 0.2s ease-in-out infinite; }
+
+        .btn { font-family: var(--main-font); border: none; border-radius: 8px; padding: 10px; width: 100%; font-weight: 900; font-size: 0.75rem; cursor: pointer; margin-bottom: 6px; transition: all 0.2s ease; color: white; text-transform: uppercase; position: relative; }
+        
         .btn-shoot { background: var(--primary-red); box-shadow: 0 4px 0 #991b1b; }
+        .btn-shoot:hover:not(:disabled) { background: var(--hover-red); transform: translateY(-1px); box-shadow: 0 5px 0 #991b1b; }
         .btn-shoot:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 2px 0 #991b1b; }
-        .btn-reset { background: var(--primary-blue); font-size: 0.7rem; }
-        .add-btn { background: #334155; width: auto; padding: 12px 30px; margin-bottom: 20px; border-radius: 25px; border: 1px solid #475569; }
-        .btn-delete { position: absolute; top: 5px; right: 5px; background: none; border: none; color: #475569; cursor: pointer; font-weight: bold; }
 
-        .revolver-svg { width: 90px; height: 90px; margin-bottom: 8px; }
+        .btn-reset { background: var(--primary-blue); box-shadow: 0 4px 0 #1e40af; font-size: 0.65rem; }
+
+        .add-btn { background: #334155; width: auto; padding: 12px 30px; margin-bottom: 20px; border-radius: 25px; border: 1px solid #475569; font-weight: 900; }
+
+        .revolver-svg { width: 90px; height: 90px; margin-bottom: 8px; transition: filter 0.3s; }
         .bullet-red { fill: var(--primary-red) !important; filter: drop-shadow(0 0 8px var(--primary-red)); }
-        .avatar-container { width: 55px; height: 55px; margin: 8px auto; border-radius: 50%; overflow: hidden; border: 2px solid #475569; }
-        .avatar-img { width: 100%; height: 100%; object-fit: cover; }
-        .info-text { font-size: 0.65rem; color: #94a3b8; }
+        
+        .avatar-container { width: 55px; height: 55px; margin: 8px auto; border-radius: 50%; padding: 2px; background: linear-gradient(45deg, #475569, #94a3b8); overflow: hidden; }
+        .avatar-img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+        
+        @keyframes spin-animation { from { transform: rotate(0deg); } to { transform: rotate(1440deg); } }
+        .spinning { animation: spin-animation 1.5s cubic-bezier(0.15, 0, 0.15, 1) forwards; }
+        
+        .btn-delete { position: absolute; top: 10px; right: 10px; background: none; border: none; color: #475569; cursor: pointer; font-weight: bold; z-index: 10; }
+        .btn-delete:hover { color: var(--primary-red); }
+
+        .status-msg { font-size: 0.85rem; font-weight: 900; margin: 8px 0; min-height: 1.5em; }
+        .success { color: var(--primary-green); }
+        .fail { color: var(--primary-red); }
+        .info-text { font-size: 0.65rem; font-weight: 900; color: #94a3b8; margin-bottom: 3px; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <img src="images/PR_Logo.png" class="logo" onerror="this.style.display='none'">
+        <img src="images/PR_Logo.png" alt="Logo" class="logo" onerror="this.style.display='none'">
     </div>
 
-    <button class="btn add-btn" id="addBtn" onclick="addPlayer()" style="display:none;">+ Добавить Игрока</button>
+    <button id="addBtn" class="btn add-btn" onclick="addPlayer()" style="display:none;">+ Добавить Игрока</button>
     
     <div class="container-wrapper">
         <div class="grid" id="mainGrid"></div>
         <div class="game-log">
-            <div style="display:flex; justify-content:space-between; margin-bottom:10px; color:#64748b; font-size:0.6rem;">
+            <div class="log-header">
                 <span>LOG CONSOLE</span>
-                <button onclick="clearLog()" style="background:none; border:none; color:var(--primary-red); cursor:pointer; font-size:0.6rem;">ОЧИСТИТЬ</button>
+                <button class="clear-log" onclick="clearLog()">ОЧИСТИТЬ</button>
             </div>
             <div id="gameLogEntries"></div>
         </div>
@@ -111,11 +209,10 @@
         const { data } = await db.from('players').select('*').order('id', { ascending: true });
         players = data || [];
         render();
-        loadLogs();
     }
 
     async function loadLogs() {
-        const { data } = await db.from('logs').select('*').order('id', { ascending: false }).limit(20);
+        const { data } = await db.from('logs').select('*').order('id', { ascending: false }).limit(30);
         const container = document.getElementById('gameLogEntries');
         container.innerHTML = (data || []).map(l => `
             <div class="log-entry ${l.type === 'win' ? 'log-win' : (l.type === 'fail' ? 'log-fail' : '')}">
@@ -126,21 +223,29 @@
 
     async function addLog(text, type) {
         await db.from('logs').insert([{ text, type }]);
+        loadLogs();
     }
 
     async function clearLog() {
-        if(confirm("Очистить историю?")) await db.from('logs').delete().neq('id', 0);
+        if(!isAdmin) return alert("Только админ может чистить логи");
+        await db.from('logs').delete().neq('id', 0);
+        loadLogs();
     }
 
     function createPoppers(cardEl) {
-        const emojis = ['🎉', '✨', '🎊', '⭐️'];
-        for(let i=0; i<15; i++) {
+        const emojis = ['🎉', '✨', '🎊', '⭐️', '🔥', '💎'];
+        for(let i=0; i<25; i++) {
             const span = document.createElement('span');
             span.className = 'popper animate-pop';
             span.innerText = emojis[Math.floor(Math.random() * emojis.length)];
-            span.style.setProperty('--tx-end', `${(Math.random() - 0.5) * 400}px`);
+            const sideWay = (Math.random() - 0.5) * 550; 
+            const upWay = -220 - (Math.random() * 280);  
+            span.style.setProperty('--tx-mid', `${sideWay * 0.4}px`);
+            span.style.setProperty('--ty-up', `${upWay}px`);
+            span.style.setProperty('--tx-end', `${sideWay}px`);
+            span.style.animationDelay = `${Math.random() * 0.3}s`;
             cardEl.appendChild(span);
-            setTimeout(() => span.remove(), 2200);
+            setTimeout(() => span.remove(), 2300);
         }
     }
 
@@ -150,40 +255,54 @@
 
         const cardEl = document.querySelector(`[data-id="${id}"]`);
         const svgEl = cardEl.querySelector('.revolver-svg');
+        
+        // Локальная анимация вращения (сразу)
+        svgEl.classList.remove('spinning');
+        void svgEl.offsetWidth; 
         svgEl.classList.add('spinning');
 
+        const left = 6 - p.pointer;
+        const chance = (100 / left).toFixed(2);
+
+        // Ждем окончания анимации
         setTimeout(async () => {
             const hit = p.chambers[p.pointer] === 1;
-            const chance = (100 / (6 - p.pointer)).toFixed(0);
             
             if (hit) {
+                // ШТРАФ
                 await db.from('players').update({ dead: true, lastResult: 'fail' }).eq('id', id);
-                await addLog(`${p.name}: ШТРАФ (${chance}%)`, 'fail');
+                await addLog(`${p.name}: ШТРАФ (ШАНС ${chance}%)`, 'fail');
+                
                 document.getElementById('mainGrid').classList.add('shake-active');
                 setTimeout(() => document.getElementById('mainGrid').classList.remove('shake-active'), 400);
             } else {
+                // ВЫЖИЛ
                 await db.from('players').update({ pointer: p.pointer + 1, lastResult: 'win' }).eq('id', id);
                 await addLog(`${p.name}: ВЫЖИЛ (${chance}%)`, 'win');
+                
+                cardEl.classList.add('card-win-glow');
                 createPoppers(cardEl);
+                setTimeout(() => cardEl.classList.remove('card-win-glow'), 2000);
             }
-        }, 1200);
+        }, 1500);
     }
 
     async function reset(id) {
-        const newChambers = [1, 0, 0, 0, 0, 0].sort(() => Math.random() - 0.5);
         const p = players.find(x => x.id === id);
+        const newChambers = [1, 0, 0, 0, 0, 0].sort(() => Math.random() - 0.5);
         await db.from('players').update({ chambers: newChambers, pointer: 0, dead: false, lastResult: null }).eq('id', id);
         await addLog(`${p.name}: ПЕРЕЗАРЯДКА`, 'info');
     }
 
     async function addPlayer() {
-        const name = prompt("Имя игрока:") || "НОВЫЙ";
+        const name = prompt("Имя игрока:")?.toUpperCase();
+        if(!name) return;
         const ch = [1, 0, 0, 0, 0, 0].sort(() => Math.random() - 0.5);
-        await db.from('players').insert([{ name: name.toUpperCase(), chambers: ch, pointer: 0, dead: false }]);
+        await db.from('players').insert([{ name, chambers: ch, pointer: 0, dead: false }]);
     }
 
     async function deletePlayer(id) {
-        if(confirm("Удалить?")) await db.from('players').delete().eq('id', id);
+        if(confirm("Удалить игрока?")) await db.from('players').delete().eq('id', id);
     }
 
     function render() {
@@ -192,34 +311,51 @@
         document.getElementById('addBtn').style.display = isAdmin ? 'block' : 'none';
 
         players.forEach(p => {
+            const left = 6 - p.pointer;
+            const chance = p.dead ? "100.00" : (100 / left).toFixed(2);
+            const isWin = p.lastResult === 'win' && !p.dead;
+            
             const card = document.createElement('div');
-            card.className = `card ${p.dead ? 'card-dead' : ''} ${p.lastResult === 'win' && !p.dead ? 'card-win-glow' : ''}`;
+            card.className = `card ${p.dead ? 'card-dead' : ''} ${isWin ? 'card-win-glow' : ''}`;
             card.setAttribute('data-id', p.id);
             
+            const statusHtml = isWin ? `<div class="status-msg success">ПОВЕЗЛО 🥳</div>` : 
+                             (p.dead ? '<div class="status-msg fail">ШТРАФ 💀</div>' : '<div class="status-msg"></div>');
+
             card.innerHTML = `
                 ${isAdmin ? `<button class="btn-delete" onclick="deletePlayer(${p.id})">✕</button>` : ''}
-                <div style="font-weight:900; margin-bottom:5px;">${p.name}</div>
+                <div style="font-weight:900; margin-bottom:10px; font-size:1rem;">${p.name}</div>
                 <svg class="revolver-svg" viewBox="0 0 200 200">
-                    <circle cx="100" cy="100" r="90" fill="#475569" />
+                    <circle cx="100" cy="100" r="90" fill="#475569" stroke="#1e293b" stroke-width="2" />
                     ${[0,60,120,180,240,300].map((deg, i) => {
                         const isBullet = p.chambers[i] === 1 && p.dead;
                         return `<circle cx="100" cy="40" r="22" fill="#0f172a" class="${isBullet ? 'bullet-red' : ''}" transform="rotate(${deg} 100 100)"/>`
                     }).join('')}
                 </svg>
                 <div class="avatar-container">
-                    <img src="images/${p.name}.jpg" onerror="this.src='https://via.placeholder.com/60/334155/94a3b8?text=?'" class="avatar-img">
+                    <img src="images/${encodeURIComponent(p.name)}.jpg" onerror="this.src='https://via.placeholder.com/60/334155/94a3b8?text=?'" class="avatar-img">
                 </div>
-                <div class="info-text">ПУЛЯ: ${p.pointer}/6</div>
-                <div class="status-msg ${p.dead ? 'fail' : 'success'}">${p.lastResult === 'win' ? 'ВЫЖИЛ' : (p.dead ? 'ШТРАФ' : '')}</div>
-                <button class="btn btn-shoot" onclick="shoot(${p.id})" ${p.dead ? 'disabled' : ''}>КРУТИТЬ</button>
-                ${isAdmin ? `<button class="btn btn-reset" onclick="reset(${p.id})">СБРОСИТЬ</button>` : ''}
+                <div class="info-text">ОСТАЛОСЬ: ${left}/6</div>
+                <div class="info-text">ШАНС: ${chance}%</div>
+                ${statusHtml}
+                <div style="margin-top:10px; position:relative; z-index:10;">
+                    <button class="btn btn-shoot" onclick="shoot(${p.id})" ${p.dead ? 'disabled' : ''}>КРУТИТЬ</button>
+                    ${isAdmin ? `<button class="btn btn-reset" onclick="reset(${p.id})">СБРОСИТЬ</button>` : ''}
+                </div>
             `;
             grid.appendChild(card);
         });
     }
 
-    db.channel('any').on('postgres_changes', { event: '*', schema: 'public', table: '*' }, () => loadData()).subscribe();
+    // Слушаем изменения в базе в реальном времени
+    db.channel('any')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'players' }, () => loadData())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'logs' }, () => loadLogs())
+      .subscribe();
+
+    // Инициализация
     loadData();
+    loadLogs();
 </script>
 </body>
 </html>
