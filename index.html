@@ -3,66 +3,118 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>POLDEN ROULETTE PRO (FIXED)</title>
+    <title>POLDEN ROULETTE PRO (STABLE & ALIGNED)</title>
     <style>
-        /* [Стили остаются прежними] */
-        :root { --primary-red: #ef4444; --hover-red: #f87171; --primary-blue: #3b82f6; --hover-blue: #60a5fa; --primary-green: #22c55e; --bg-dark: #0f172a; --card-bg: #1e293b; --text-main: #f1f5f9; --main-font: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
-        body { font-family: var(--main-font); background: var(--bg-dark); color: var(--text-main); display: flex; flex-direction: column; align-items: center; padding: 15px; margin: 0; overflow-x: hidden; text-transform: uppercase; }
+        :root { 
+            --primary-red: #ef4444; --hover-red: #f87171;
+            --primary-blue: #3b82f6; --hover-blue: #60a5fa;
+            --primary-green: #22c55e;
+            --bg-dark: #0f172a; --card-bg: #1e293b; --text-main: #f1f5f9;
+            --main-font: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+        
+        body { 
+            font-family: var(--main-font); background: var(--bg-dark); color: var(--text-main); 
+            display: flex; flex-direction: column; align-items: center; padding: 15px; margin: 0;
+            overflow-x: hidden; text-transform: uppercase;
+        }
+
         .header { text-align: center; margin-bottom: 15px; }
         .logo { width: 110px; height: auto; filter: drop-shadow(0 0 15px rgba(59, 130, 246, 0.4)); }
+
         .container-wrapper { position: relative; width: 100%; display: flex; justify-content: center; }
-        .grid { display: flex; flex-wrap: wrap; gap: 12px; max-width: 1160px; justify-content: center; z-index: 1; }
-        .game-log { position: absolute; right: 20px; top: 0; width: 220px; background: rgba(15, 23, 42, 0.9); border: 1px solid #334155; border-radius: 14px; padding: 12px; max-height: 80vh; overflow-y: auto; font-size: 0.65rem; font-weight: 800; display: flex; flex-direction: column; gap: 6px; z-index: 10; backdrop-filter: blur(4px); }
-        .log-header { display: flex; justify-content: space-between; align-items: center; color: #64748b; border-bottom: 1px solid #334155; padding-bottom: 5px; margin-bottom: 5px; font-size: 0.55rem; }
-        .clear-log { cursor: pointer; color: var(--primary-red); background: none; border: none; font-size: 0.5rem; font-weight: 900; }
-        .log-entry { padding: 4px 8px; border-left: 2px solid var(--primary-blue); background: rgba(255,255,255,0.03); animation: slideIn 0.2s ease-out; }
-        .log-win { border-color: var(--primary-green); color: var(--primary-green); }
-        .log-fail { border-color: var(--primary-red); color: var(--primary-red); }
-        @keyframes slideIn { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
-        .card { background: var(--card-bg); border-radius: 14px; padding: 12px; width: 180px; box-shadow: 0 8px 20px -5px rgba(0, 0, 0, 0.4); border: 1px solid #334155; text-align: center; position: relative; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); box-sizing: border-box; }
-        .card-dead::after { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: url('https://www.transparenttextures.com/patterns/broken-glass.png'); opacity: 0.5; pointer-events: none; border-radius: inherit; z-index: 5; }
+        .grid { display: flex; flex-wrap: wrap; gap: 15px; max-width: 1200px; justify-content: center; z-index: 1; }
+
+        /* CARD DESIGN - ВЫРАВНИВАНИЕ */
+        .card { 
+            background: var(--card-bg); border-radius: 14px; padding: 15px; 
+            width: 190px; 
+            height: 420px; /* Фиксированная высота для всех карточек */
+            display: flex; flex-direction: column; align-items: center;
+            box-shadow: 0 8px 20px -5px rgba(0, 0, 0, 0.4); 
+            border: 1px solid #334155; text-align: center; position: relative;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-sizing: border-box;
+        }
+
+        .player-name {
+            font-weight: 900; font-size: 0.9rem;
+            min-height: 2.4em; /* Место под 2 строки имени */
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 10px; width: 100%;
+        }
+
+        .card-dead::after {
+            content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: url('https://www.transparenttextures.com/patterns/broken-glass.png');
+            opacity: 0.5; pointer-events: none; border-radius: inherit; z-index: 5;
+        }
+        
         .card-win-glow { box-shadow: 0 0 30px rgba(34, 197, 94, 0.6) !important; border-color: var(--primary-green) !important; }
-        .popper { position: absolute; top: 50%; left: 50%; pointer-events: none; font-size: 1.6rem; z-index: 100; opacity: 0; will-change: transform, opacity; }
-        @keyframes cinematic-pop { 0% { transform: translate(-50%, -50%) scale(0) rotate(0deg); opacity: 0; } 15% { opacity: 1; transform: translate(-50%, -50%) scale(1.2) rotate(45deg); } 30% { transform: translate(-50%, -50%) translate(var(--tx-mid), var(--ty-up)) scale(1) rotate(180deg); } 100% { transform: translate(-50%, -50%) translate(var(--tx-end), 500px) scale(0.5) rotate(720deg); opacity: 0; } }
-        .animate-pop { animation: cinematic-pop 2.2s cubic-bezier(0.215, 0.61, 0.355, 1) forwards; }
-        @keyframes screen-shake { 0%, 100% { transform: translate(0,0); } 20% { transform: translate(-8px, 4px); } 40% { transform: translate(8px, -4px); } 60% { transform: translate(-8px, -4px); } 80% { transform: translate(8px, 4px); } }
-        .shake-active { animation: screen-shake 0.2s ease-in-out infinite; }
-        .btn { font-family: var(--main-font); border: none; border-radius: 8px; padding: 10px; width: 100%; font-weight: 900; font-size: 0.75rem; cursor: pointer; margin-bottom: 6px; transition: all 0.2s ease; color: white; text-transform: uppercase; position: relative; }
+
+        /* ЭЛЕМЕНТЫ ВНУТРИ КАРТОЧКИ */
+        .revolver-svg { width: 85px; height: 85px; margin-bottom: 10px; flex-shrink: 0; }
+        .avatar-container { 
+            width: 60px; height: 60px; border-radius: 50%; overflow: hidden; 
+            border: 2px solid #475569; margin-bottom: 10px; flex-shrink: 0;
+        }
+        .avatar-img { width: 100%; height: 100%; object-fit: cover; }
+
+        .info-box { margin-bottom: 10px; flex-shrink: 0; }
+        .info-text { font-size: 0.65rem; font-weight: 900; color: #94a3b8; margin: 2px 0; }
+        .status-msg { font-size: 0.8rem; font-weight: 900; min-height: 1.5em; margin-bottom: 10px; }
+
+        /* КНОПКИ ВНИЗУ */
+        .controls { width: 100%; margin-top: auto; position: relative; z-index: 10; }
+        .btn { 
+            font-family: var(--main-font); border: none; border-radius: 8px; padding: 10px; 
+            width: 100%; font-weight: 900; font-size: 0.75rem; cursor: pointer; 
+            margin-top: 5px; color: white; text-transform: uppercase; transition: all 0.2s; 
+        }
         .btn-shoot { background: var(--primary-red); box-shadow: 0 4px 0 #991b1b; }
         .btn-shoot:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 2px 0 #991b1b; }
-        .btn-reset { background: var(--primary-blue); box-shadow: 0 4px 0 #1e40af; font-size: 0.65rem; }
-        .admin-controls { display: flex; gap: 10px; margin-bottom: 20px; }
-        .add-btn { background: #334155; width: auto; padding: 12px 20px; border-radius: 25px; border: 1px solid #475569; font-weight: 900; }
-        .revolver-svg { width: 90px; height: 90px; margin-bottom: 8px; transition: filter 0.3s; }
-        .bullet-red { fill: var(--primary-red) !important; filter: drop-shadow(0 0 8px var(--primary-red)); }
-        .avatar-container { width: 55px; height: 55px; margin: 8px auto; border-radius: 50%; padding: 2px; background: linear-gradient(45deg, #475569, #94a3b8); overflow: hidden; }
-        .avatar-img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+        .btn-reset { background: var(--primary-blue); box-shadow: 0 3px 0 #1e40af; font-size: 0.65rem; }
+
+        /* LOGS */
+        .game-log {
+            position: absolute; right: 20px; top: 0; width: 220px; background: rgba(15, 23, 42, 0.9);
+            border: 1px solid #334155; border-radius: 14px; padding: 12px; max-height: 80vh;
+            overflow-y: auto; font-size: 0.65rem; font-weight: 800; display: flex; flex-direction: column;
+            gap: 6px; z-index: 100; backdrop-filter: blur(4px);
+        }
+        .log-entry { padding: 4px 8px; border-left: 2px solid var(--primary-blue); background: rgba(255,255,255,0.03); }
+        
+        /* ANIMATIONS */
         @keyframes spin-animation { from { transform: rotate(0deg); } to { transform: rotate(1440deg); } }
         .spinning { animation: spin-animation 1.5s cubic-bezier(0.15, 0, 0.15, 1) forwards; }
-        .btn-delete { position: absolute; top: 10px; right: 10px; background: none; border: none; color: #475569; cursor: pointer; font-weight: bold; z-index: 10; }
-        .status-msg { font-size: 0.85rem; font-weight: 900; margin: 8px 0; min-height: 1.5em; }
-        .success { color: var(--primary-green); }
-        .fail { color: var(--primary-red); }
-        .info-text { font-size: 0.65rem; font-weight: 900; color: #94a3b8; margin-bottom: 3px; }
+        @keyframes screen-shake { 0%, 100% { transform: translate(0,0); } 20% { transform: translate(-6px, 3px); } 40% { transform: translate(6px, -3px); } 60% { transform: translate(-6px, -3px); } 80% { transform: translate(6px, 3px); } }
+        .shake-active { animation: screen-shake 0.2s ease-in-out infinite; }
+        .popper { position: absolute; top: 50%; left: 50%; pointer-events: none; font-size: 1.6rem; z-index: 100; opacity: 0; }
+        @keyframes cinematic-pop { 0% { transform: translate(-50%, -50%) scale(0); opacity: 0; } 15% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); } 100% { transform: translate(-50%, -50%) translate(var(--tx-end), 400px) rotate(720deg); opacity: 0; } }
+        .animate-pop { animation: cinematic-pop 2.2s forwards; }
+
+        .admin-panel { display: flex; gap: 10px; margin-bottom: 20px; }
+        .btn-admin { background: #334155; width: auto; padding: 10px 20px; border-radius: 20px; }
+        .btn-delete { position: absolute; top: 8px; right: 8px; background: none; border: none; color: #475569; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <img src="images/PR_Logo.png" alt="Logo" class="logo" onerror="this.style.display='none'">
+        <img src="images/PR_Logo.png" class="logo" onerror="this.style.display='none'">
     </div>
 
-    <div id="adminPanel" class="admin-controls" style="display:none;">
-        <button class="btn add-btn" onclick="addPlayer()">+ Игрок</button>
-        <button class="btn add-btn" style="background: #1e3a8a;" onclick="restoreDefaultPlayers()">♻ Восстановить всех</button>
+    <div id="adminPanel" class="admin-panel" style="display:none;">
+        <button class="btn btn-admin" onclick="addPlayer()">+ Игрок</button>
+        <button class="btn btn-admin" style="background: #1e3a8a;" onclick="restoreDefaultPlayers()">♻ Восстановить всех</button>
     </div>
     
     <div class="container-wrapper">
         <div class="grid" id="mainGrid"></div>
         <div class="game-log">
-            <div class="log-header">
+            <div style="display:flex; justify-content:space-between; color:#64748b; margin-bottom:5px;">
                 <span>LOG CONSOLE</span>
-                <button class="clear-log" onclick="clearLog()">ОЧИСТИТЬ</button>
+                <button onclick="clearLog()" style="background:none; border:none; color:var(--primary-red); cursor:pointer;">X</button>
             </div>
             <div id="gameLogEntries"></div>
         </div>
@@ -75,75 +127,45 @@
     const db = supabase.createClient(S_URL, S_KEY);
 
     let players = [];
-    let isLocalShooting = false; 
+    let localShootingId = null; 
     const isAdmin = new URLSearchParams(window.location.search).get('role') === 'admin';
     if(isAdmin) document.getElementById('adminPanel').style.display = 'flex';
 
-    const defaultNames = ["Витя", "Игорь (сценарист)", "Катя", "Вася (монтажер)", "Игорь (монтажер)", "Дима (монтажер)", "Артур", "Лиза", "Марина", "Вася (дизайнер)", "Саша"];
-
     async function loadData() {
-        const { data, error } = await db.from('players').select('*').order('id', { ascending: true });
-        if (error) return console.error("Ошибка загрузки:", error);
+        const { data } = await db.from('players').select('*').order('id', { ascending: true });
         players = data || [];
         render();
     }
 
-    async function restoreDefaultPlayers() {
-        if(!confirm("Это удалит текущих игроков и создаст список заново. Уверен?")) return;
-        await db.from('players').delete().neq('id', 0);
-        const batch = defaultNames.map(n => ({
-          name: n, // Теперь имя будет отправляться в базу ровно так, как написано в массиве
-            chambers: [1,0,0,0,0,0].sort(() => Math.random() - 0.5),
-            pointer: 0,
-            dead: false
-        }));
-        await db.from('players').insert(batch);
-        // loadData вызовется автоматически через Realtime
-    }
-
     async function loadLogs() {
         const { data } = await db.from('logs').select('*').order('id', { ascending: false }).limit(20);
-        const container = document.getElementById('gameLogEntries');
-        container.innerHTML = (data || []).map(l => `
-            <div class="log-entry ${l.type === 'win' ? 'log-win' : (l.type === 'fail' ? 'log-fail' : '')}">
-                [${new Date(l.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'})}] ${l.text}
+        document.getElementById('gameLogEntries').innerHTML = (data || []).map(l => `
+            <div class="log-entry" style="color: ${l.type === 'win' ? '#22c55e' : (l.type === 'fail' ? '#ef4444' : '#94a3b8')}">
+                [${new Date(l.created_at).toLocaleTimeString()}] ${l.text}
             </div>
         `).join('');
     }
 
-    async function addLog(text, type) {
-        await db.from('logs').insert([{ text, type }]);
-    }
-
-    async function clearLog() {
-        if(!isAdmin) return alert("Только для админа");
-        await db.from('logs').delete().neq('id', 0);
-    }
-
     function createPoppers(cardEl) {
-        const emojis = ['🎉', '✨', '🎊', '⭐️', '🔥', '💎'];
-        for(let i=0; i<20; i++) {
+        const emojis = ['🎉', '✨', '🎊', '⭐️', '🔥'];
+        for(let i=0; i<15; i++) {
             const span = document.createElement('span');
             span.className = 'popper animate-pop';
             span.innerText = emojis[Math.floor(Math.random() * emojis.length)];
-            const sideWay = (Math.random() - 0.5) * 400; 
-            span.style.setProperty('--tx-mid', `${sideWay * 0.4}px`);
-            span.style.setProperty('--ty-up', `${-200 - Math.random()*200}px`);
-            span.style.setProperty('--tx-end', `${sideWay}px`);
+            span.style.setProperty('--tx-end', `${(Math.random() - 0.5) * 300}px`);
             cardEl.appendChild(span);
             setTimeout(() => span.remove(), 2300);
         }
     }
 
     async function shoot(id) {
-        if (isLocalShooting) return; 
+        if (localShootingId) return;
         const p = players.find(x => x.id === id);
         if (!p || p.dead) return;
 
-        isLocalShooting = true; 
+        localShootingId = id;
         const cardEl = document.querySelector(`[data-id="${id}"]`);
-        const svgEl = cardEl.querySelector('.revolver-svg');
-        svgEl.classList.add('spinning');
+        cardEl.querySelector('.revolver-svg').classList.add('spinning');
 
         const left = 6 - p.pointer;
         const chance = (100 / left).toFixed(2);
@@ -152,33 +174,48 @@
             const hit = p.chambers[p.pointer] === 1;
             if (hit) {
                 await db.from('players').update({ dead: true, lastResult: 'fail' }).eq('id', id);
-                await addLog(`${p.name}: ШТРАФ (${chance}%)`, 'fail');
+                await db.from('logs').insert([{ text: `${p.name}: ШТРАФ (${chance}%)`, type: 'fail' }]);
                 document.getElementById('mainGrid').classList.add('shake-active');
                 setTimeout(() => document.getElementById('mainGrid').classList.remove('shake-active'), 400);
             } else {
                 await db.from('players').update({ pointer: p.pointer + 1, lastResult: 'win' }).eq('id', id);
-                await addLog(`${p.name}: ВЫЖИЛ (${chance}%)`, 'win');
+                await db.from('logs').insert([{ text: `${p.name}: ВЫЖИЛ (${chance}%)`, type: 'win' }]);
                 createPoppers(cardEl);
             }
-            isLocalShooting = false;
+            localShootingId = null;
         }, 1500);
     }
 
     async function reset(id) {
-        const newChambers = [1, 0, 0, 0, 0, 0].sort(() => Math.random() - 0.5);
         const p = players.find(x => x.id === id);
-        await db.from('players').update({ chambers: newChambers, pointer: 0, dead: false, lastResult: null }).eq('id', id);
-        await addLog(`${p.name}: ПЕРЕЗАРЯДКА`, 'info');
+        await db.from('players').update({ 
+            chambers: [1,0,0,0,0,0].sort(()=>Math.random()-0.5), 
+            pointer: 0, dead: false, lastResult: null 
+        }).eq('id', id);
+    }
+
+    async function restoreDefaultPlayers() {
+        if(!confirm("Сбросить всех?")) return;
+        await db.from('players').delete().neq('id', 0);
+        const names = ["Витя", "Игорь (сценарист)", "Катя", "Вася (монтажер)", "Игорь (монтажер)", "Дима (монтажер)", "Артур", "Лиза", "Марина", "Вася (дизайнер)", "Саша"];
+        await db.from('players').insert(names.map(n => ({
+            name: n.toUpperCase(),
+            chambers: [1,0,0,0,0,0].sort(()=>Math.random()-0.5),
+            pointer: 0, dead: false
+        })));
     }
 
     async function addPlayer() {
-        const name = prompt("Имя игрока:")?.toUpperCase();
-        if(!name) return;
-        await db.from('players').insert([{ name, chambers: [1,0,0,0,0,0].sort(()=>Math.random()-0.5), pointer: 0, dead: false }]);
+        const name = prompt("Имя:")?.toUpperCase();
+        if(name) await db.from('players').insert([{ name, chambers: [1,0,0,0,0,0].sort(()=>Math.random()-0.5), pointer: 0, dead: false }]);
     }
 
     async function deletePlayer(id) {
         if(confirm("Удалить?")) await db.from('players').delete().eq('id', id);
+    }
+
+    async function clearLog() {
+        if(confirm("Очистить?")) await db.from('logs').delete().neq('id', 0);
     }
 
     function render() {
@@ -186,25 +223,22 @@
         
         players.forEach(p => {
             let card = document.querySelector(`[data-id="${p.id}"]`);
-            const isWin = p.lastResult === 'win' && !p.dead;
-            
             if (!card) {
                 card = document.createElement('div');
                 card.setAttribute('data-id', p.id);
                 grid.appendChild(card);
             }
 
-            // Если МЫ СЕЙЧАС крутим барабан, не перезаписываем HTML этой карточки, 
-            // иначе анимация прервется. Для всех остальных - обновляем.
-            if (!isLocalShooting || shootingId !== p.id) {
+            // Не обновляем HTML, если эта карточка СЕЙЧАС крутится у нас локально
+            if (localShootingId !== p.id) {
                 const left = 6 - p.pointer;
                 const chance = p.dead ? "100.00" : (100 / left).toFixed(2);
-                const imgPath = `images/${encodeURIComponent(p.name)}.jpg`;
+                const isWin = p.lastResult === 'win' && !p.dead;
 
                 card.className = `card ${p.dead ? 'card-dead' : ''} ${isWin ? 'card-win-glow' : ''}`;
                 card.innerHTML = `
                     ${isAdmin ? `<button class="btn-delete" onclick="deletePlayer(${p.id})">✕</button>` : ''}
-                    <div style="font-weight:900; margin-bottom:10px;">${p.name}</div>
+                    <div class="player-name">${p.name}</div>
                     <svg class="revolver-svg" viewBox="0 0 200 200">
                         <circle cx="100" cy="100" r="90" fill="#475569" />
                         ${[0,60,120,180,240,300].map((deg, i) => {
@@ -213,35 +247,34 @@
                         }).join('')}
                     </svg>
                     <div class="avatar-container">
-                        <img src="${imgPath}" onerror="this.src='https://via.placeholder.com/60/334155/94a3b8?text=?'" class="avatar-img">
+                        <img src="images/${encodeURIComponent(p.name)}.jpg" onerror="this.src='https://via.placeholder.com/60/334155/94a3b8?text=?'" class="avatar-img">
                     </div>
-                    <div class="info-text">ОСТАЛОСЬ: ${left}/6</div>
-                    <div class="info-text">ШАНС: ${chance}%</div>
-                    <div class="status-msg ${isWin ? 'success' : (p.dead ? 'fail' : '')}">${isWin ? 'ПОВЕЗЛО 🥳' : (p.dead ? 'ШТРАФ 💀' : '')}</div>
-                    <button class="btn btn-shoot" onclick="shoot(${p.id})" ${p.dead ? 'disabled' : ''}>КРУТИТЬ</button>
-                    ${isAdmin ? `<button class="btn btn-reset" onclick="reset(${p.id})">СБРОСИТЬ</button>` : ''}
+                    <div class="info-box">
+                        <div class="info-text">ОСТАЛОСЬ: ${left}/6</div>
+                        <div class="info-text">ШАНС: ${chance}%</div>
+                    </div>
+                    <div class="status-msg ${isWin ? 'success' : (p.dead ? 'fail' : '')}">
+                        ${isWin ? 'ПОВЕЗЛО 🥳' : (p.dead ? 'ШТРАФ 💀' : '')}
+                    </div>
+                    <div class="controls">
+                        <button class="btn btn-shoot" onclick="shoot(${p.id})" ${p.dead ? 'disabled' : ''}>КРУТИТЬ</button>
+                        ${isAdmin ? `<button class="btn btn-reset" onclick="reset(${p.id})">СБРОСИТЬ</button>` : ''}
+                    </div>
                 `;
             }
         });
 
-        // Удаление лишних
+        // Удаление лишних карточек
         document.querySelectorAll('.card').forEach(c => {
             if (!players.find(p => p.id == c.getAttribute('data-id'))) c.remove();
         });
     }
 
-    // РЕАЛТАЙМ (Самый важный блок)
-    const channel = db.channel('realtime_world')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'players' }, (payload) => {
-          console.log("DB Change:", payload);
-          loadData(); // Перегружаем данные при любом изменении в таблице
-      })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'logs' }, () => {
-          loadLogs();
-      })
-      .subscribe((status) => {
-          console.log("Subscription status:", status);
-      });
+    // REALTIME
+    db.channel('any')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'players' }, () => loadData())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'logs' }, () => loadLogs())
+      .subscribe();
 
     loadData();
     loadLogs();
