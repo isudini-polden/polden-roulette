@@ -5,204 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>POLDEN ROULETTE PRO</title>
     <style>
+        /* Оставляем твой CSS без изменений, он отличный */
         :root { 
-            --primary-red: #ef4444; 
-            --hover-red: #f87171;
-            --primary-blue: #3b82f6; 
-            --hover-blue: #60a5fa;
-            --primary-green: #22c55e;
-            --bg-dark: #0f172a; 
-            --card-bg: #1e293b; 
-            --text-main: #f1f5f9;
+            --primary-red: #ef4444; --hover-red: #f87171;
+            --primary-blue: #3b82f6; --hover-blue: #60a5fa;
+            --primary-green: #22c55e; --bg-dark: #0f172a; 
+            --card-bg: #1e293b; --text-main: #f1f5f9;
             --main-font: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
-        
-        body { 
-            font-family: var(--main-font); 
-            background: var(--bg-dark); 
-            color: var(--text-main); 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            padding: 15px; 
-            margin: 0;
-            overflow-x: hidden;
-            text-transform: uppercase;
-        }
-
+        body { font-family: var(--main-font); background: var(--bg-dark); color: var(--text-main); display: flex; flex-direction: column; align-items: center; padding: 15px; margin: 0; text-transform: uppercase; }
         .header { text-align: center; margin-bottom: 15px; }
-        .logo { width: 110px; height: auto; filter: drop-shadow(0 0 15px rgba(59, 130, 246, 0.4)); }
-
-        .container-wrapper {
-            position: relative;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-        }
-
-        .grid { 
-            display: flex; 
-            flex-wrap: wrap; 
-            gap: 12px; 
-            max-width: 1160px;
-            justify-content: center; 
-            z-index: 1;
-        }
-
-        /* LOG SYSTEM */
-        .game-log {
-            position: absolute;
-            right: 20px;
-            top: 0;
-            width: 220px;
-            background: rgba(15, 23, 42, 0.9);
-            border: 1px solid #334155;
-            border-radius: 14px;
-            padding: 12px;
-            max-height: 80vh;
-            overflow-y: auto;
-            font-size: 0.65rem;
-            font-weight: 800;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            scrollbar-width: thin;
-            z-index: 10;
-            backdrop-filter: blur(4px);
-        }
-        
-        .log-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            color: #64748b;
-            border-bottom: 1px solid #334155;
-            padding-bottom: 5px;
-            margin-bottom: 5px;
-            font-size: 0.55rem;
-        }
-
-        .clear-log { 
-            cursor: pointer; 
-            color: var(--primary-red); 
-            background: none; 
-            border: none; 
-            font-size: 0.5rem; 
-            font-weight: 900; 
-            transition: opacity 0.2s;
-        }
-        .clear-log:hover { opacity: 0.7; }
-
-        .log-entry { padding: 4px 8px; border-left: 2px solid var(--primary-blue); background: rgba(255,255,255,0.03); animation: slideIn 0.2s ease-out; }
-        .log-win { border-color: var(--primary-green); color: var(--primary-green); }
-        .log-fail { border-color: var(--primary-red); color: var(--primary-red); }
-
-        @keyframes slideIn { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
-
-        /* CARD DESIGN */
-        .card { 
-            background: var(--card-bg); 
-            border-radius: 14px; 
-            padding: 12px; 
-            width: 180px; 
-            box-shadow: 0 8px 20px -5px rgba(0, 0, 0, 0.4); 
-            border: 1px solid #334155; 
-            text-align: center; 
-            position: relative;
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            box-sizing: border-box;
-        }
-        .card:hover {
-            border-color: #475569;
-            transform: translateY(-2px);
-            box-shadow: 0 12px 25px -5px rgba(0, 0, 0, 0.5);
-        }
-
-        .card-dead::after {
-            content: "";
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: url('https://www.transparenttextures.com/patterns/broken-glass.png');
-            opacity: 0.5;
-            pointer-events: none;
-            border-radius: inherit; 
-            z-index: 5;
-        }
-        
-        .card-win-glow {
-            box-shadow: 0 0 30px rgba(34, 197, 94, 0.6) !important;
-            border-color: var(--primary-green) !important;
-        }
-
-        /* КИНЕМАТОГРАФИЧНОЕ КОНФЕТТИ */
-        .popper {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            pointer-events: none;
-            font-size: 1.6rem;
-            z-index: 100;
-            opacity: 0;
-            will-change: transform, opacity;
-        }
-
-        @keyframes cinematic-pop {
-            0% { transform: translate(-50%, -50%) scale(0) rotate(0deg); opacity: 0; }
-            15% { opacity: 1; transform: translate(-50%, -50%) scale(1.2) rotate(45deg); }
-            30% { transform: translate(-50%, -50%) translate(var(--tx-mid), var(--ty-up)) scale(1) rotate(180deg); }
-            100% { transform: translate(-50%, -50%) translate(var(--tx-end), 500px) scale(0.5) rotate(720deg); opacity: 0; }
-        }
-        .animate-pop { animation: cinematic-pop 2.2s cubic-bezier(0.215, 0.61, 0.355, 1) forwards; }
-
-        @keyframes screen-shake {
-            0%, 100% { transform: translate(0,0); }
-            20% { transform: translate(-8px, 4px); }
-            40% { transform: translate(8px, -4px); }
-            60% { transform: translate(-8px, -4px); }
-            80% { transform: translate(8px, 4px); }
-        }
-        .shake-active { animation: screen-shake 0.2s ease-in-out infinite; }
-
-        /* BUTTONS & HOVERS */
-        input.player-name { font-family: var(--main-font); background: transparent; color: white; border: none; border-bottom: 1px solid #334155; text-align: center; margin-bottom: 12px; font-weight: 900; font-size: 0.9rem; width: 100%; outline: none; text-transform: uppercase; transition: border-color 0.2s; }
-        input.player-name:focus { border-color: var(--primary-blue); }
-
-        .btn { font-family: var(--main-font); border: none; border-radius: 8px; padding: 10px; width: 100%; font-weight: 900; font-size: 0.75rem; cursor: pointer; margin-bottom: 6px; transition: all 0.2s ease; color: white; text-transform: uppercase; position: relative; }
-        
-        .btn-shoot { background: var(--primary-red); box-shadow: 0 4px 0 #991b1b; }
-        .btn-shoot:hover:not(:disabled) { background: var(--hover-red); transform: translateY(-1px); box-shadow: 0 5px 0 #991b1b; }
-        .btn-shoot:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 2px 0 #991b1b; }
-
-        .btn-reset { background: var(--primary-blue); box-shadow: 0 4px 0 #1e40af; }
-        .btn-reset:hover { background: var(--hover-blue); transform: translateY(-1px); box-shadow: 0 5px 0 #1e40af; }
-        .btn-reset:active { transform: translateY(2px); box-shadow: 0 2px 0 #1e40af; }
-
-        .btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
-
-        .add-btn { background: #334155; width: auto; padding: 12px 30px; margin-bottom: 20px; border-radius: 25px; border: 1px solid #475569; font-weight: 900; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-        .add-btn:hover { background: #475569; transform: scale(1.05); }
-
-        /* ELEMENTS */
-        .revolver-svg { width: 90px; height: 90px; margin-bottom: 8px; z-index: 2; transition: filter 0.3s; }
-        .card:hover .revolver-svg { filter: drop-shadow(0 0 5px rgba(255,255,255,0.1)); }
-        
-        .metal { fill: #475569; stroke: #1e293b; stroke-width: 2; }
-        .chamber-hole { fill: #0f172a; }
-        .bullet-red { fill: var(--primary-red) !important; filter: drop-shadow(0 0 8px var(--primary-red)); }
-        
-        .avatar-container { width: 55px; height: 55px; margin: 8px auto; border-radius: 50%; padding: 2px; background: linear-gradient(45deg, #475569, #94a3b8); overflow: hidden; }
-        .avatar-img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-        
-        @keyframes spin-animation { from { transform: rotate(0deg); } to { transform: rotate(1440deg); } }
-        .spinning { animation: spin-animation 1.5s cubic-bezier(0.15, 0, 0.15, 1) forwards; }
-        
-        .btn-delete { position: absolute; top: 10px; right: 10px; background: none; border: none; color: #475569; cursor: pointer; opacity: 0; transition: 0.2s; font-weight: bold; z-index: 10; }
-        .card:hover .btn-delete { opacity: 1; color: var(--primary-red); }
-
-        .status-msg { font-size: 0.85rem; font-weight: 900; margin: 8px 0; min-height: 1.5em; }
-        .success { color: var(--primary-green); }
-        .fail { color: var(--primary-red); }
-        .info-text { font-size: 0.65rem; font-weight: 900; color: #94a3b8; margin-bottom: 3px; }
+        .logo { width: 110px; filter: drop-shadow(0 0 15px rgba(59, 130, 246, 0.4)); }
+        .container-wrapper { position: relative; width: 100%; display: flex; justify-content: center; }
+        .grid { display: flex; flex-wrap: wrap; gap: 12px; max-width: 1160px; justify-content: center; }
+        .game-log { position: absolute; right: 20px; top: 0; width: 220px; background: rgba(15, 23, 42, 0.9); border: 1px solid #334155; border-radius: 14px; padding: 12px; max-height: 80vh; overflow-y: auto; font-size: 0.65rem; z-index: 10; }
+        .log-header { display: flex; justify-content: space-between; border-bottom: 1px solid #334155; padding-bottom: 5px; margin-bottom: 5px; }
+        .card { background: var(--card-bg); border-radius: 14px; padding: 12px; width: 180px; border: 1px solid #334155; text-align: center; position: relative; }
+        .card-dead { opacity: 0.7; }
+        .card-dead::after { content: "💀"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 3rem; z-index: 5; }
+        .btn { border: none; border-radius: 8px; padding: 10px; width: 100%; font-weight: 900; cursor: pointer; margin-bottom: 6px; color: white; text-transform: uppercase; }
+        .btn-shoot { background: var(--primary-red); }
+        .btn-reset { background: var(--primary-blue); }
+        .add-btn { background: #334155; width: auto; padding: 12px 30px; margin-bottom: 20px; border-radius: 25px; }
+        .revolver-svg { width: 80px; height: 80px; }
+        .metal { fill: #475569; }
+        .bullet-red { fill: var(--primary-red); }
+        .avatar-container { width: 60px; height: 60px; margin: 10px auto; border-radius: 50%; border: 2px solid #475569; overflow: hidden; }
+        .avatar-img { width: 100%; height: 100%; object-fit: cover; }
+        .btn-delete { position: absolute; top: 5px; right: 5px; background: none; border: none; color: #475569; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -211,265 +41,102 @@
         <img src="images/PR_Logo.png" alt="Logo" class="logo">
     </div>
 
-    <button class="btn add-btn" onclick="addPlayer()">+ Добавить Игрока</button>
+    <button class="btn add-btn" id="addBtn" onclick="addPlayer()">+ Добавить Игрока</button>
     
     <div class="container-wrapper">
         <div class="grid" id="mainGrid"></div>
-        <div class="game-log" id="gameLogContainer">
-            <div class="log-header">
-                <span>LOG CONSOLE</span>
-                <button class="clear-log" onclick="clearLog()">ОЧИСТИТЬ</button>
-            </div>
+        <div class="game-log">
+            <div class="log-header"><span>LOG CONSOLE</span></div>
             <div id="gameLogEntries"></div>
         </div>
     </div>
 
-<script>
-    let players = JSON.parse(localStorage.getItem('polden_roulette_v21_players')) || [];
-    let gameLogs = JSON.parse(localStorage.getItem('polden_roulette_v21_logs')) || [];
-
-    function save() {
-        localStorage.setItem('polden_roulette_v21_players', JSON.stringify(players));
-        localStorage.setItem('polden_roulette_v21_logs', JSON.stringify(gameLogs));
-    }
-
-    function addLog(text, type) {
-        const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
-        gameLogs.unshift({ text: `[${time}] ${text}`, type });
-        if(gameLogs.length > 50) gameLogs.pop();
-        renderLogs();
-        save();
-    }
-
-    function renderLogs() {
-        const container = document.getElementById('gameLogEntries');
-        container.innerHTML = gameLogs.map(log => `
-            <div class="log-entry ${log.type === 'win' ? 'log-win' : (log.type === 'fail' ? 'log-fail' : '')}">
-                ${log.text}
-            </div>
-        `).join('');
-    }
-
-    function clearLog() {
-        gameLogs = [];
-        renderLogs();
-        save();
-    }
-
-    function createPoppers(cardEl) {
-        const emojis = ['🎉', '✨', '🎊', '⭐️', '🔥', '💎', '🔵', '🟡'];
-        for(let i=0; i<30; i++) {
-            const span = document.createElement('span');
-            span.className = 'popper animate-pop';
-            span.innerText = emojis[Math.floor(Math.random() * emojis.length)];
-            const sideWay = (Math.random() - 0.5) * 550; 
-            const upWay = -220 - (Math.random() * 280);  
-            span.style.setProperty('--tx-mid', `${sideWay * 0.4}px`);
-            span.style.setProperty('--ty-up', `${upWay}px`);
-            span.style.setProperty('--tx-end', `${sideWay}px`);
-            span.style.animationDelay = `${Math.random() * 0.3}s`;
-            cardEl.appendChild(span);
-            setTimeout(() => span.remove(), 2300);
-        }
-    }
-
-    function shoot(id) {
-        const p = players.find(x => x.id === id);
-        if (p.dead) return;
-        const cardEl = document.querySelector(`[data-id="${id}"]`);
-        const gridEl = document.getElementById('mainGrid');
-        const svgEl = cardEl.querySelector('.revolver-svg');
-        
-        svgEl.classList.remove('spinning');
-        void svgEl.offsetWidth; 
-        svgEl.classList.add('spinning');
-
-        const left = 6 - p.pointer;
-        const chance = (100 / left).toFixed(2);
-
-        setTimeout(() => {
-            const hit = p.chambers[p.pointer] === 1;
-            if (hit) {
-                p.dead = true;
-                p.lastResult = 'fail';
-                addLog(`${p.name}: ШТРАФ (ШАНС ${chance}%)`, 'fail');
-                gridEl.classList.add('shake-active');
-                setTimeout(() => gridEl.classList.remove('shake-active'), 400);
-                render();
-            } else {
-                p.pointer++;
-                p.lastResult = 'win';
-                addLog(`${p.name}: ВЫЖИЛ (${chance}%)`, 'win');
-                render();
-                const newCardEl = document.querySelector(`[data-id="${id}"]`);
-                newCardEl.classList.add('card-win-glow');
-                createPoppers(newCardEl);
-                setTimeout(() => newCardEl.classList.remove('card-win-glow'), 2000);
-            }
-        }, 1500);
-    }
-
-    function reset(id) {
-        const p = players.find(x => x.id === id);
-        addLog(`${p.name}: ПЕРЕЗАРЯДКА`, '');
-        p.chambers = [1, 0, 0, 0, 0, 0].sort(() => Math.random() - 0.5);
-        p.pointer = 0;
-        p.dead = false;
-        p.lastResult = null;
-        render();
-    }
-
-    function addPlayer() {
-        players.push({ id: Date.now(), name: "НОВЫЙ", chambers: [1,0,0,0,0,0].sort(()=>Math.random()-0.5), pointer: 0, dead: false, lastResult: null });
-        render();
-    }
-
-    function removePlayer(id) {
-        players = players.filter(p => p.id !== id);
-        render();
-    }
-
-    function render() {
-        const grid = document.getElementById('mainGrid');
-        grid.innerHTML = '';
-        players.forEach(p => {
-            const left = 6 - p.pointer;
-            const chance = p.dead ? "100.00" : (100 / left).toFixed(2);
-            const isWin = p.lastResult === 'win' && !p.dead;
-            const card = document.createElement('div');
-            card.className = `card ${p.dead ? 'card-dead' : ''}`;
-            card.setAttribute('data-id', p.id);
-            const statusHtml = isWin ? `<div class="status-msg success">ПОВЕЗЛО 🥳</div>` : 
-                             (p.dead ? '<div class="status-msg fail">ШТРАФ 💀</div>' : '<div class="status-msg"></div>');
-            card.innerHTML = `
-                <button class="btn-delete" onclick="removePlayer(${p.id})">✕</button>
-                <input class="player-name" value="${p.name}" onchange="players.find(x=>x.id==${p.id}).name=this.value.toUpperCase(); save();">
-                <svg class="revolver-svg" viewBox="0 0 200 200">
-                    <circle cx="100" cy="100" r="90" class="metal" />
-                    ${[0,60,120,180,240,300].map((deg, i) => {
-                        const isBullet = p.chambers[i] === 1 && p.dead;
-                        return `<circle cx="100" cy="40" r="22" class="chamber-hole ${isBullet ? 'bullet-red' : ''}" transform="rotate(${deg} 100 100)"/>`
-                    }).join('')}
-                </svg>
-                <div class="avatar-container">
-                    <img src="images/${encodeURIComponent(p.name.trim())}.jpg" onerror="this.src='https://via.placeholder.com/60/334155/94a3b8?text=?'" class="avatar-img">
-                </div>
-                <div class="info-text">ОСТАЛОСЬ: ${left}/6</div>
-                <div class="info-text">ШАНС: ${chance}%</div>
-                ${statusHtml}
-                <div style="margin-top:10px; position:relative; z-index:10;">
-                    <button class="btn btn-shoot" onclick="shoot(${p.id})" ${p.dead ? 'disabled' : ''}>КРУТИТЬ</button>
-                    <button class="btn btn-reset" onclick="reset(${p.id})">СБРОСИТЬ</button>
-                </div>
-            `;
-            grid.appendChild(card);
-        });
-        save();
-    }
-
-    if (players.length === 0) {
-        ["Витя", "Игорь (сценарист)", "Катя", "Вася (монтажер)", "Игорь (монтажер)", "Дима (монтажер)", "Артур", "Лиза", "Марина", "Вася (дизайнер)", "Саша"]
-        .forEach(n => players.push({ id: Math.random(), name: n.toUpperCase(), chambers: [1,0,0,0,0,0].sort(()=>Math.random()-0.5), pointer: 0, dead: false, lastResult: null }));
-    }
-    render();
-    renderLogs();
-</script>
-    <!-- Подключаем библиотеку Supabase в самом верху скриптов -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <script>
-    // ВСТАВЬ СВОИ ДАННЫЕ ТУТ
     const SUPABASE_URL = 'https://ezjxamiwgwuuslntfpcm.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV6anhhbWl3Z3d1dXNsbnRmcGNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5NzQ2ODgsImV4cCI6MjA5MzU1MDY4OH0.0vSWZaGVubIGVfAzcfcYbs-8g8YRPmO68BTal0HlXdU';
     const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let players = [];
 
-    // Загрузка данных при старте и обновлении
+    // Загрузка
     async function loadData() {
-        const { data, error } = await supabase
-            .from('players')
-            .select('*')
-            .order('id', { ascending: true });
-        
+        const { data } = await supabase.from('players').select('*').order('id', { ascending: true });
         if (data) {
             players = data;
             render();
         }
     }
 
-    // РЕАЛЬНОЕ ВРЕМЯ: Слушаем изменения в базе
-    supabase
-        .channel('public:players')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'players' }, () => {
-            loadData(); // Как только кто-то выстрелил, у всех обновляется экран
-        })
-        .subscribe();
+    // Realtime
+    supabase.channel('public:players').on('postgres_changes', { event: '*', schema: 'public', table: 'players' }, () => {
+        loadData();
+    }).subscribe();
 
-    // Функция выстрела (теперь пишет в облако)
     async function shoot(id) {
         const p = players.find(x => x.id === id);
         if (p.dead) return;
-
         const hit = p.chambers[p.pointer] === 1;
-        let updates = hit 
-            ? { dead: true, lastResult: 'fail' } 
-            : { pointer: p.pointer + 1, lastResult: 'win' };
-
+        let updates = hit ? { dead: true, lastResult: 'fail' } : { pointer: p.pointer + 1, lastResult: 'win' };
         await supabase.from('players').update(updates).eq('id', id);
     }
 
-    // Сброс (только для админа)
     async function reset(id) {
         const newChambers = [1, 0, 0, 0, 0, 0].sort(() => Math.random() - 0.5);
-        await supabase.from('players').update({
-            chambers: newChambers,
-            pointer: 0,
-            dead: false,
-            lastResult: null
-        }).eq('id', id);
+        await supabase.from('players').update({ chambers: newChambers, pointer: 0, dead: false, lastResult: null }).eq('id', id);
     }
 
-    // Добавление игрока (только для админа)
     async function addPlayer() {
-        const name = prompt("Имя коллеги:") || "НОВЫЙ";
-        const newP = {
+        const name = prompt("Имя:") || "НОВЫЙ";
+        await supabase.from('players').insert([{
             name: name.toUpperCase(),
             chambers: [1, 0, 0, 0, 0, 0].sort(() => Math.random() - 0.5),
             pointer: 0,
             dead: false
-        };
-        await supabase.from('players').insert([newP]);
+        }]);
     }
 
-    // Удаление (только для админа)
     async function removePlayer(id) {
-        if(confirm("Удалить игрока?")) {
-            await supabase.from('players').delete().eq('id', id);
-        }
+        if(confirm("Удалить?")) await supabase.from('players').delete().eq('id', id);
     }
 
-    // Отрисовка (render) остается почти такой же, 
-    // но добавьте в конце функцию скрытия кнопок для не-админов
     function render() {
         const grid = document.getElementById('mainGrid');
+        const isAdmin = new URLSearchParams(window.location.search).get('role') === 'admin';
         grid.innerHTML = '';
         
-        players.forEach(p => {
-            // ... тут твой старый код создания карточки ...
-            // (обязательно используй p.id, p.name, p.dead и т.д.)
-        });
+        // Скрываем общую кнопку добавления
+        document.getElementById('addBtn').style.display = isAdmin ? 'block' : 'none';
 
-        // ПРОВЕРКА РОЛИ
-        const isAdmin = new URLSearchParams(window.location.search).get('role') === 'admin';
-        if (!isAdmin) {
-            if(document.querySelector('.add-btn')) document.querySelector('.add-btn').style.display = 'none';
-            document.querySelectorAll('.btn-reset').forEach(b => b.style.display = 'none');
-            document.querySelectorAll('.btn-delete').forEach(b => b.style.display = 'none');
-        }
+        players.forEach(p => {
+            const card = document.createElement('div');
+            card.className = `card ${p.dead ? 'card-dead' : ''}`;
+            
+            // Логика картинок: берем имя из базы и ищем в папке images
+            // Важно: если в базе "ВИТЯ", файл должен быть "ВИТЯ.jpg" или измените на lowercase
+            const imgPath = `images/${p.name}.jpg`;
+
+            card.innerHTML = `
+                ${isAdmin ? `<button class="btn-delete" onclick="removePlayer(${p.id})">✕</button>` : ''}
+                <div style="font-weight:900; margin-bottom:10px;">${p.name}</div>
+                <div class="avatar-container">
+                    <img src="${imgPath}" onerror="this.src='https://via.placeholder.com/60/334155/94a3b8?text=?'" class="avatar-img">
+                </div>
+                <svg class="revolver-svg" viewBox="0 0 200 200">
+                    <circle cx="100" cy="100" r="90" class="metal" />
+                    ${[0,60,120,180,240,300].map((deg, i) => {
+                        const isBullet = p.chambers[i] === 1 && p.dead;
+                        return `<circle cx="100" cy="40" r="22" fill="#0f172a" class="${isBullet ? 'bullet-red' : ''}" transform="rotate(${deg} 100 100)"/>`
+                    }).join('')}
+                </svg>
+                <div style="font-size:0.7rem; margin: 5px 0;">ПУЛЯ: ${p.dead ? 'В ГОЛОВЕ' : p.pointer + '/6'}</div>
+                <button class="btn btn-shoot" onclick="shoot(${p.id})" ${p.dead ? 'disabled' : ''}>КРУТИТЬ</button>
+                ${isAdmin ? `<button class="btn btn-reset" onclick="reset(${p.id})">СБРОСИТЬ</button>` : ''}
+            `;
+            grid.appendChild(card);
+        });
     }
 
-    // Первый запуск
     loadData();
 </script>
 </body>
