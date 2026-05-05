@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>POLDEN ROULETTE PRO (ONE LINE FIX)</title>
+    <title>POLDEN ROULETTE PRO (FIXED & ANIMATED)</title>
     <style>
         :root { 
             --primary-red: #ef4444; --hover-red: #f87171;
@@ -27,26 +27,22 @@
             justify-content: center; z-index: 1; padding-bottom: 50px;
         }
 
-        /* КАРТОЧКИ */
+        /* КАРТОЧКА */
         .card { 
             background: var(--card-bg); border-radius: 14px; padding: 15px; 
-            width: 195px; height: 410px; /* Фиксированная высота */
+            width: 195px; height: 420px; 
             display: flex; flex-direction: column; align-items: center;
             box-shadow: 0 8px 20px -5px rgba(0, 0, 0, 0.4); 
             border: 1px solid #334155; text-align: center; position: relative;
-            box-sizing: border-box;
+            box-sizing: border-box; transition: transform 0.3s, border-color 0.3s;
         }
+        .card:hover { transform: translateY(-3px); border-color: #475569; }
 
         /* ИМЯ В ОДНУ СТРОКУ */
         .player-name {
-            font-weight: 900; font-size: 0.8rem;
-            width: 100%;
-            white-space: nowrap;      /* Не переносить на новую строку */
-            overflow: hidden;         /* Скрывать то, что не влезло */
-            text-overflow: ellipsis;  /* Добавлять троеточие */
-            display: block; 
-            margin-bottom: 12px;
-            flex-shrink: 0;
+            font-weight: 900; font-size: 0.8rem; width: 100%;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            display: block; margin-bottom: 12px; flex-shrink: 0;
         }
 
         .card-dead::after {
@@ -57,7 +53,23 @@
         
         .card-win-glow { box-shadow: 0 0 30px rgba(34, 197, 94, 0.6) !important; border-color: var(--primary-green) !important; }
 
-        .revolver-svg { width: 80px; height: 80px; margin-bottom: 10px; flex-shrink: 0; }
+        /* АНИМАЦИИ */
+        .revolver-svg { width: 80px; height: 80px; margin-bottom: 10px; flex-shrink: 0; z-index: 2; }
+        @keyframes spin-animation { from { transform: rotate(0deg); } to { transform: rotate(1440deg); } }
+        .spinning { animation: spin-animation 1.5s cubic-bezier(0.15, 0, 0.15, 1) forwards; }
+        
+        @keyframes screen-shake { 0%, 100% { transform: translate(0,0); } 20% { transform: translate(-8px, 4px); } 40% { transform: translate(8px, -4px); } 60% { transform: translate(-8px, -4px); } 80% { transform: translate(8px, 4px); } }
+        .shake-active { animation: screen-shake 0.2s ease-in-out infinite; }
+
+        /* КОНФЕТТИ */
+        .popper { position: absolute; top: 50%; left: 50%; pointer-events: none; font-size: 1.6rem; z-index: 100; opacity: 0; }
+        @keyframes cinematic-pop {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+            15% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+            100% { transform: translate(-50%, -50%) translate(var(--tx-end), 500px) rotate(720deg); opacity: 0; }
+        }
+        .animate-pop { animation: cinematic-pop 2.2s forwards; }
+
         .avatar-container { 
             width: 60px; height: 60px; border-radius: 50%; overflow: hidden; 
             border: 2px solid #475569; margin-bottom: 10px; flex-shrink: 0; background: #0f172a;
@@ -65,9 +77,9 @@
         .avatar-img { width: 100%; height: 100%; object-fit: cover; }
 
         .info-text { font-size: 0.65rem; font-weight: 900; color: #94a3b8; margin: 2px 0; }
-        .status-msg { font-size: 0.75rem; font-weight: 900; min-height: 1.5em; margin: 5px 0; }
+        .status-msg { font-size: 0.75rem; font-weight: 900; min-height: 1.5em; margin: 8px 0; }
 
-        .controls { width: 100%; margin-top: auto; } /* Прижимает кнопки к низу */
+        .controls { width: 100%; margin-top: auto; }
         .btn { 
             font-family: var(--main-font); border: none; border-radius: 8px; padding: 10px; 
             width: 100%; font-weight: 900; font-size: 0.7rem; cursor: pointer; 
@@ -75,7 +87,7 @@
         }
         .btn-shoot { background: var(--primary-red); box-shadow: 0 4px 0 #991b1b; }
         .btn-shoot:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 2px 0 #991b1b; }
-        .btn-reset { background: var(--primary-blue); font-size: 0.6rem; opacity: 0.8; }
+        .btn-reset { background: var(--primary-blue); box-shadow: 0 3px 0 #1e40af; opacity: 0.9; }
 
         .game-log {
             position: fixed; right: 20px; top: 20px; width: 220px; 
@@ -84,11 +96,6 @@
             overflow-y: auto; font-size: 0.6rem; z-index: 1000; backdrop-filter: blur(8px);
         }
 
-        @keyframes spin-animation { from { transform: rotate(0deg); } to { transform: rotate(1440deg); } }
-        .spinning { animation: spin-animation 1.5s cubic-bezier(0.15, 0, 0.15, 1) forwards; }
-        @keyframes screen-shake { 0%, 100% { transform: translate(0,0); } 20% { transform: translate(-5px, 3px); } 40% { transform: translate(5px, -3px); } 60% { transform: translate(-5px, -3px); } 80% { transform: translate(5px, 3px); } }
-        .shake-active { animation: screen-shake 0.2s ease-in-out infinite; }
-        
         .admin-panel { display: flex; gap: 10px; margin-bottom: 25px; }
         .btn-admin { background: #334155; width: auto; padding: 10px 20px; border-radius: 20px; }
     </style>
@@ -107,9 +114,9 @@
     <div class="grid" id="mainGrid"></div>
 
     <div class="game-log">
-        <div style="display:flex; justify-content:space-between; margin-bottom:8px; border-bottom:1px solid #334155; padding-bottom:4px;">
-            <span style="color:#64748b">LOGS</span>
-            <button onclick="clearLog()" style="background:none; border:none; color:var(--primary-red); cursor:pointer;">CLR</button>
+        <div style="display:flex; justify-content:space-between; margin-bottom:8px; color:#64748b; border-bottom:1px solid #334155;">
+            <span>LOGS</span>
+            <button onclick="clearLog()" style="background:none; border:none; color:var(--primary-red); cursor:pointer;">X</button>
         </div>
         <div id="gameLogEntries"></div>
     </div>
@@ -121,7 +128,7 @@
     const db = supabase.createClient(S_URL, S_KEY);
 
     let players = [];
-    let isShootingLocally = false;
+    let localShootingId = null; 
     const isAdmin = new URLSearchParams(window.location.search).get('role') === 'admin';
     if(isAdmin) document.getElementById('adminPanel').style.display = 'flex';
 
@@ -132,22 +139,37 @@
     }
 
     async function loadLogs() {
-        const { data } = await db.from('logs').select('*').order('id', { ascending: false }).limit(25);
+        const { data } = await db.from('logs').select('*').order('id', { ascending: false }).limit(20);
         document.getElementById('gameLogEntries').innerHTML = (data || []).map(l => `
-            <div style="margin-bottom:3px; color:${l.type==='fail'?'#ef4444':l.type==='win'?'#22c55e':'#94a3b8'}">
+            <div style="color:${l.type==='fail'?'#ef4444':l.type==='win'?'#22c55e':'#94a3b8'}; margin-bottom:3px;">
                 [${new Date(l.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}] ${l.text}
             </div>
         `).join('');
     }
 
+    function createPoppers(cardEl) {
+        const emojis = ['🎉', '✨', '🎊', '⭐️', '🔥', '💎'];
+        for(let i=0; i<25; i++) {
+            const span = document.createElement('span');
+            span.className = 'popper animate-pop';
+            span.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+            span.style.setProperty('--tx-end', `${(Math.random() - 0.5) * 400}px`);
+            cardEl.appendChild(span);
+            setTimeout(() => span.remove(), 2300);
+        }
+    }
+
     async function shoot(id) {
-        if (isShootingLocally) return;
+        if (localShootingId) return;
         const p = players.find(x => x.id === id);
         if (!p || p.dead) return;
 
-        isShootingLocally = true;
+        localShootingId = id;
         const cardEl = document.querySelector(`[data-id="${id}"]`);
         const svgEl = cardEl.querySelector('.revolver-svg');
+        
+        svgEl.classList.remove('spinning');
+        void svgEl.offsetWidth; 
         svgEl.classList.add('spinning');
 
         const left = 6 - p.pointer;
@@ -163,21 +185,10 @@
             } else {
                 await db.from('players').update({ pointer: p.pointer + 1, lastResult: 'win' }).eq('id', id);
                 await db.from('logs').insert([{ text: `${p.name}: ВЫЖИЛ (${chance}%)`, type: 'win' }]);
+                createPoppers(cardEl);
             }
-            isShootingLocally = false;
-            svgEl.classList.remove('spinning');
+            localShootingId = null;
         }, 1500);
-    }
-
-    async function restoreDefaultPlayers() {
-        if(!confirm("Восстановить список?")) return;
-        await db.from('players').delete().neq('id', 0);
-        const names = ["Витя", "Игорь (сценарист)", "Катя", "Вася (монтажер)", "Игорь (монтажер)", "Дима (монтажер)", "Артур", "Лиза", "Марина", "Вася (дизайнер)", "Саша"];
-        await db.from('players').insert(names.map(n => ({
-            name: n, 
-            chambers: [1,0,0,0,0,0].sort(()=>Math.random()-0.5),
-            pointer: 0, dead: false, lastResult: null
-        })));
     }
 
     async function reset(id) {
@@ -187,9 +198,19 @@
         }).eq('id', id);
     }
 
+    async function restoreDefaultPlayers() {
+        if(!confirm("Восстановить список?")) return;
+        await db.from('players').delete().neq('id', 0);
+        const names = ["Витя", "Игорь (сценарист)", "Катя", "Вася (монтажер)", "Игорь (монтажер)", "Дима (монтажер)", "Артур", "Лиза", "Марина", "Вася (дизайнер)", "Саша"];
+        await db.from('players').insert(names.map(n => ({
+            name: n, chambers: [1,0,0,0,0,0].sort(()=>Math.random()-0.5),
+            pointer: 0, dead: false, lastResult: null
+        })));
+    }
+
     async function addPlayer() {
-        const name = prompt("Имя игрока:");
-        if(name) await db.from('players').insert([{ name, chambers:[1,0,0,0,0,0].sort(()=>Math.random()-0.5), pointer:0, dead:false}]);
+        const name = prompt("Имя:");
+        if(name) await db.from('players').insert([{ name, chambers: [1,0,0,0,0,0].sort(()=>Math.random()-0.5), pointer: 0, dead: false }]);
     }
 
     async function deletePlayer(id) {
@@ -211,15 +232,16 @@
                 grid.appendChild(card);
             }
 
-            if (!isShootingLocally || (card.getAttribute('data-id') != p.id)) {
+            // Важно: не перерисовываем карточку, если МЫ СЕЙЧАС её крутим
+            if (localShootingId !== p.id) {
                 const left = 6 - p.pointer;
                 const chance = p.dead ? "100.00" : (100 / left).toFixed(2);
                 const isWin = p.lastResult === 'win' && !p.dead;
-                const imgName = encodeURIComponent(p.name);
+                const imgPath = `images/${encodeURIComponent(p.name)}.jpg`;
 
                 card.className = `card ${p.dead ? 'card-dead' : ''} ${isWin ? 'card-win-glow' : ''}`;
                 card.innerHTML = `
-                    ${isAdmin ? `<button style="position:absolute; top:5px; right:5px; background:none; border:none; color:#475569; cursor:pointer; font-weight:bold; z-index:20;" onclick="deletePlayer(${p.id})">✕</button>` : ''}
+                    ${isAdmin ? `<button style="position:absolute; top:8px; right:8px; background:none; border:none; color:#475569; cursor:pointer; font-weight:bold; z-index:20;" onclick="deletePlayer(${p.id})">✕</button>` : ''}
                     <div class="player-name" title="${p.name}">${p.name}</div>
                     <svg class="revolver-svg" viewBox="0 0 200 200">
                         <circle cx="100" cy="100" r="90" fill="#475569" />
@@ -229,7 +251,7 @@
                         }).join('')}
                     </svg>
                     <div class="avatar-container">
-                        <img src="images/${imgName}.jpg" onerror="this.src='https://via.placeholder.com/60/334155/94a3b8?text=?'" class="avatar-img">
+                        <img src="${imgPath}" onerror="this.src='https://via.placeholder.com/60/334155/94a3b8?text=?'" class="avatar-img">
                     </div>
                     <div class="info-text">ОСТАЛОСЬ: ${left}/6</div>
                     <div class="info-text">ШАНС: ${chance}%</div>
@@ -244,15 +266,25 @@
             }
         });
 
+        // Удаляем из DOM лишних
         document.querySelectorAll('.card').forEach(c => {
-            if (!players.find(p => p.id == c.getAttribute('data-id'))) c.remove();
+            const id = parseInt(c.getAttribute('data-id'));
+            if (!players.find(p => p.id === id)) c.remove();
         });
     }
 
-    db.channel('any')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'players' }, () => loadData())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'logs' }, () => loadLogs())
-      .subscribe();
+    // РЕАЛТАЙМ
+    db.channel('public:players')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'players' }, (payload) => {
+          console.log('Update detected:', payload);
+          loadData();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'logs' }, () => {
+          loadLogs();
+      })
+      .subscribe((status) => {
+          console.log('Realtime status:', status);
+      });
 
     loadData();
     loadLogs();
